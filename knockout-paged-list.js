@@ -61,15 +61,12 @@ var PagedList = function (params) {
         });
 
         self.nextEnabled = ko.computed(function () {
-            console.log(self.currentPage() !== self.totalPages(),
-                self.currentPage(), self.totalPages());
             return self.currentPage() !== self.totalPages();
         });
 
-        self.showFirstEntriesEnabled = function () {
-            console.log(self.nextEnabled());
+        self.showFirstEntriesEnabled = ko.computed(function () {
             return self.hasEntries() && self.totalEntries() > self.defaultEntriesPerPage;
-        };
+        });
 
         self.firstEntriesCount = ko.computed(function () {
             return self.totalEntries() < self.entriesPerPage() ? self.totalEntries() : self.defaultEntriesPerPage;
@@ -89,9 +86,9 @@ var PagedList = function (params) {
             return self.data().length;
         });
 
-        self.shownAll = function () {
+        self.shownAll = ko.computed(function () {
             return self.entriesPerPage() >= self.totalEntries();
-        };
+        });
 
         self.totalEntriesOnNextPage = function () {
             return self.requestedPage() * self.entriesPerPage();
@@ -174,7 +171,7 @@ var PagedList = function (params) {
 
                 self.activeSort(sort);
                 self.sortOnly(true);
-                
+
                 UpdateDisplayedEntries();
             }
         };
@@ -255,9 +252,8 @@ var PagedList = function (params) {
 
                     ProcessResponse(response);
 
-                }).fail(ExtractError).always(function () {
+                }).fail(ProcessError).always(function () {
                     self.loading(false);
-                    self.currentPage(self.requestedPage());
                 });
             }
         }
@@ -288,6 +284,9 @@ var PagedList = function (params) {
         function ProcessResponse(response) {
             if (response.data.length > 0) {
                 ProcessResponseData(response.data);
+
+                // Update current page to requested page
+                self.currentPage(self.requestedPage());
             }
 
             ProcessResponseDetails(response.details);
@@ -327,19 +326,20 @@ var PagedList = function (params) {
             }
         }
 
-        function ExtractError(jqXHR, status, error) {
+        function ProcessError(jqXHR, status, error) {
             self.error({
                 jqXHR: jqXHR,
                 status: status,
                 error: error
             });
+            self.appliedFilter([]);
         }
         
         
         /* INITIALIZATION */
 
         function init() {
-            
+
             if (self.defaultUrl !== undefined) {
                 self.setUrl(self.defaultUrl);
 
