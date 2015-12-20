@@ -272,9 +272,14 @@ self.appliedFilter()
 ```javascript
 /* Sorting observables */
 
-self.header = ko.observableArray();
-self.sortOnly = ko.observable();
-self.activeSort = ko.observableArray();
+// array of the header of loaded data
+self.header()
+
+// set to true to perform sort retaining the current number of loaded entries/result
+self.sortOnly()
+
+// contains the value of the 'column' to sort, and 'asc' equals to true if ascending otherwise false 
+self.activeSort()
 ```
 
 
