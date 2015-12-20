@@ -5,35 +5,32 @@ var PagedList = function (params) {
 
         /* VARIABLES */
 
-        // Settings/Options variables
+        /* Settings/Options variables */
         
         self.queryOnLoad = params.queryOnLoad !== undefined ? params.queryOnLoad : true;
         self.defaultEntriesPerPage = params.entriesPerPage || 5;
         self.defaultUrl = params.url;
                
-        // Paging variables
+        /* Paging variables */
         
         self.url = ko.observable();
         self.data = ko.observableArray();
-        self.pageNumber = ko.observable(1);
+        self.currentPage = ko.observable(1);
         self.totalEntries = ko.observable(0);
         self.entriesPerPage = ko.observable(self.defaultEntriesPerPage);
-
-        self.entries = ko.computed(function () {
-            var first = (self.pageNumber() - 1) * self.entriesPerPage();
-            return self.data.slice(first, first + self.entriesPerPage());
-        });
-        
-        // Server-related variables
+        self.requestedPage = ko.observable();
+   
+        /* Server-related variables */
         
         self.error = ko.observableArray();
         self.loading = ko.observable();
         
-        // Filtering variable
+        /* Filtering variables */
         
         self.filter = ko.observableArray();
+        self.currentFilter = ko.observableArray();
 
-        // Sorting variables
+        /* Sorting variables */
         
         self.header = ko.observableArray();
         self.sortOnly = ko.observable();
@@ -42,7 +39,61 @@ var PagedList = function (params) {
      
         /* HELPERS */
         
-        // Server-related helpers
+        /* Paging helpers */
+
+        // Entries to display
+        self.entries = ko.computed(function () {
+            var first = (self.currentPage() - 1) * self.entriesPerPage();
+            return self.data.slice(first, first + self.entriesPerPage());
+        });
+     
+        self.hasEntries = function () {
+            return self.totalEntries() > 0;
+        };
+
+        self.totalPages = ko.computed(function () {
+            return Math.ceil(self.totalEntries() / self.entriesPerPage());
+        });
+
+        self.onFirstPage = ko.computed(function () {
+            return self.currentPage() === 1;
+        });
+
+        self.onLastPage = ko.computed(function () {
+            return self.currentPage() >= self.totalPages();
+        });
+
+        self.showFirstEntriesEnabled = function () {
+            return self.hasEntries() && self.totalEntries() > self.defaultEntriesPerPage;
+        };
+
+        self.firstEntriesCount = ko.computed(function () {
+            return self.totalEntries() < self.entriesPerPage() ? self.totalEntries() : self.defaultEntriesPerPage;
+        });
+
+        self.previousItemsCount = ko.computed(function () {
+            return self.defaultEntriesPerPage;
+        });
+
+        self.nextItemsCount = ko.computed(function () {
+            return self.totalPages() - self.currentPage() == 1 ?
+                self.totalEntries() - (self.entriesPerPage() * (self.totalPages() - 1)) :
+                self.defaultEntriesPerPage;
+        });
+
+        self.shownAll = function () {
+            return self.entriesPerPage() >= self.totalEntries();
+        };
+
+        self.loadedEntries = function () {
+            return self.data().length;
+        };
+
+        self.totalEntriesOnNextPage = function () {
+            return (self.currentPage() + 2) * self.entriesPerPage();
+        };
+        
+        /* Server-related helpers */
         
         self.setUrl = function (url) {
             self.url(url !== undefined ? url : self.defaultUrl);
@@ -60,98 +111,50 @@ var PagedList = function (params) {
             return self.error().status !== undefined ? self.error().status === "parsererror" : false;
         });
         
-        // Paging helpers
-
-        self.hasEntries = function () {
-            return self.totalEntries() > 0;
-        };
-
-        self.totalPages = ko.computed(function () {
-            return Math.ceil(self.totalEntries() / self.entriesPerPage());
-        });
-
-        self.onFirstPage = ko.computed(function () {
-            return self.pageNumber() === 1;
-        });
-
-        self.onLastPage = ko.computed(function () {
-            return self.pageNumber() >= self.totalPages();
-        });
-
-        self.showFirstEntriesEnabled = function () {
-            return self.hasEntries() && self.totalEntries() > self.defaultEntriesPerPage;
-        };
-
-        self.firstEntriesCount = ko.computed(function () {
-            return self.totalEntries() < self.entriesPerPage() ? self.totalEntries() : self.defaultEntriesPerPage;
-        });
-
-        self.previousItemsCount = ko.computed(function () {
-            return self.defaultEntriesPerPage;
-        });
-
-        self.nextItemsCount = ko.computed(function () {
-            return self.totalPages() - self.pageNumber() == 1 ?
-                self.totalEntries() - (self.entriesPerPage() * (self.totalPages() - 1)) :
-                self.defaultEntriesPerPage;
-        });
-
-        self.shownAll = function () {
-            return self.entriesPerPage() >= self.totalEntries();
-        };
-
-        self.loadedEntries = function () {
-            return self.data().length;
-        };
-
-        self.totalEntriesOnNextPage = function () {
-            return (self.pageNumber() + 2) * self.entriesPerPage();
-        };
-        
         /* FUNCTIONS */
         
-        // Paging functions
+        /* Paging functions */
         
         self.firstPage = function () {
-            self.pageNumber(1);
+            self.currentPage(1);
         };
 
         self.lastPage = function () {
-            self.pageNumber(self.totalPages());
+            self.currentPage(self.totalPages());
         };
 
         self.next = function () {
-            if (self.pageNumber() < self.totalPages()) {
+            if (self.currentPage() < self.totalPages()) {
                 if (self.loadedEntries() < self.totalEntriesOnNextPage() &&
                     self.loadedEntries() != self.totalEntries()) {
                         
                     ExecuteQuery(true);
                 } else {
-                    self.pageNumber(self.pageNumber() + 1);
+                    self.currentPage(self.currentPage() + 1);
                 }
             }
         };
 
         self.previous = function () {
-            if (self.pageNumber() !== 0) {
-                self.pageNumber(self.pageNumber() - 1);
+            if (self.currentPage() !== 0) {
+                self.currentPage(self.currentPage() - 1);
             }
         };
 
         self.showFirstEntries = function () {
-            self.pageNumber(1);
+            self.currentPage(1);
             self.entriesPerPage(self.defaultEntriesPerPage);
         };
 
         self.showAll = function () {
-            self.pageNumber(1);
+            self.currentPage(1);
             self.entriesPerPage(self.totalEntries());
 
             if (self.loadedEntries() < self.totalEntries())
                 ExecuteQuery();
         };
         
-        // Sort functions
+        /* Sort functions */
 
         self.sort = function (column, data, event) {
             GetDataUrl(event);
@@ -172,12 +175,12 @@ var PagedList = function (params) {
             }
         };
         
-        // Server-related functions 
+        /* Server-related functions */
 
         self.getList = function (data, event) {
             GetDataUrl(event);
             
-            self.pageNumber(1);
+            self.currentPage(1);
             self.entriesPerPage(self.defaultEntriesPerPage);
             ExecuteQuery();
         };
@@ -211,7 +214,7 @@ var PagedList = function (params) {
         function BuildQueryOptions(appendData) {
             // Paging options
             var queryOptions = {
-                page: self.pageNumber() + (appendData ? 1 : 0),
+                page: self.currentPage() + (appendData ? 1 : 0),
                 perPage: self.entriesPerPage(),
                 currentEntries: self.loadedEntries(),
             };
@@ -227,7 +230,7 @@ var PagedList = function (params) {
                 self.sortOnly(false);
             }
             
-            // Query or Filters
+            // Filtering options
             $.extend(queryOptions, self.filter());
 
             return queryOptions;
@@ -240,8 +243,8 @@ var PagedList = function (params) {
                     
                     // Increment page number after loading data so that the
                     // display will not be empty while waiting for the response
-                    if (self.pageNumber() < self.totalPages())
-                        self.pageNumber(self.pageNumber() + 1);
+                    if (self.currentPage() < self.totalPages())
+                        self.currentPage(self.currentPage() + 1);
                 } else {
                     ExtractHeader(response);
                     self.data(response.data);
