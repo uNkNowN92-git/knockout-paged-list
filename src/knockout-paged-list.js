@@ -293,6 +293,7 @@ var PagedList = function (params) {
             }
 
             ProcessResponseDetails(response.details);
+            self.error([]);
         }
 
         function ProcessResponseData(data) {
