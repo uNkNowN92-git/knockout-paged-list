@@ -1,31 +1,3 @@
-/* Polyfill for non-ES6 browsers */
-if (!Object.is) {
-  Object.is = function(x, y) {
-    // SameValue algorithm
-    if (x === y) { // Steps 1-5, 7-10
-      // Steps 6.b-6.e: +0 != -0
-      return x !== 0 || 1 / x === 1 / y;
-    } else {
-      // Step 6.a: NaN == NaN
-      return x !== x && y !== y;
-    }
-  };
-}
-/* End - Polyfill for non-ES6 browsers */
-
-var obj1, obj2;
-
-obj1 = {miles:"123":AvailableVehicle:"32"};
-obj2 = {miles:"123":AvailableVehicle:"32"};
-
-console.log(Object.is(obj1, obj2));
-
-obj2 = {"miles":"123","AvailableVehicle":"322"};
-console.log(Object.is(obj1, obj2));
-
-obj2 = {};
-console.log(Object.is(obj1, obj2));
-
 var PagedList = function (params) {
     return function (params) {
         var self = this;
@@ -141,8 +113,8 @@ var PagedList = function (params) {
         /* Paging functions */
 
         self.firstPage = function () {
-            // Not yet implemented
-            // self.currentPage(1);
+            self.requestedPage(1);
+            UpdateDisplayedEntries();
         };
 
         self.lastPage = function () {
@@ -211,6 +183,7 @@ var PagedList = function (params) {
         };
 
         self.getList = function (data, event) {
+            self.requestedPage(1);
             GetDataUrl(event);
 
             UpdateDisplayedEntries();
@@ -245,14 +218,17 @@ var PagedList = function (params) {
         }
 
         function FiltersHasChanged() {
+            var result = false;
             var currentFilter = {};
             $.extend(currentFilter, [self.filter()][0]);
 
-            if (!_.isEqual(currentFilter, self.appliedFilter())) {
+            // Use simple comparison to remove dependency on underscore.js
+            if (ko.toJSON(currentFilter) != ko.toJSON(self.appliedFilter())) {
+            // if (!_.isEqual(currentFilter, self.appliedFilter())) {
                 self.appliedFilter(currentFilter);
-                return true;
+                result = true;
             }
-            return false;
+            return result;
         }
 
         function UpdateNeeded() {
@@ -291,8 +267,9 @@ var PagedList = function (params) {
                 page: self.requestedPage(),
                 perPage: self.entriesPerPage(),
                 currentEntries: self.loadedEntriesCount(),
+                showAll: ShowAll()
             };
-
+            
             // Sorting options
             if (self.activeSort()) {
                 $.extend(queryOptions, {
@@ -307,6 +284,10 @@ var PagedList = function (params) {
 
             return queryOptions;
         }
+        
+        function ShowAll() {
+            return self.requestedPage() === 1 && self.entriesPerPage() === self.totalEntries();
+        }
 
         function ProcessResponse(response) {
             if (response.data.length > 0) {
@@ -317,6 +298,7 @@ var PagedList = function (params) {
             }
 
             ProcessResponseDetails(response.details);
+            self.error([]);
         }
 
         function ProcessResponseData(data) {

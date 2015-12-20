@@ -267,8 +267,9 @@ var PagedList = function (params) {
                 page: self.requestedPage(),
                 perPage: self.entriesPerPage(),
                 currentEntries: self.loadedEntriesCount(),
+                showAll: ShowAll()
             };
-
+            
             // Sorting options
             if (self.activeSort()) {
                 $.extend(queryOptions, {
@@ -282,6 +283,10 @@ var PagedList = function (params) {
             $.extend(queryOptions, self.filter());
 
             return queryOptions;
+        }
+        
+        function ShowAll() {
+            return self.requestedPage() === 1 && self.entriesPerPage() === self.totalEntries();
         }
 
         function ProcessResponse(response) {
