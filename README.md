@@ -7,11 +7,9 @@ It also has a built-in [filtering](#filtering) and [sorting](#sorting) options t
 
 #Dependencies
 > [KnockoutJS](http://knockoutjs.com/)  
- [jQuery](https://jquery.com/)  
- [Underscore.js](http://underscorejs.org//)
+ [jQuery](https://jquery.com/)
 
 #Todo
-* Remove underscore js as dependency
 * Write test scripts
 * Create a demo page
 
@@ -23,7 +21,6 @@ Include scripts in page:
 <!-- Required scripts -->
 <script src="jquery.js"></script>
 <script src="knockout.js"></script>
-<script src="underscore.js"></script>
 <script src="knockout-paged-list.js"></script>
 
 <!-- Your view model -->
@@ -345,16 +342,16 @@ self.parserError()
 ```javascript
 /* Paging functions */
 
-// Go to the first page [Not yet implemented]
+// Go to the first page
 self.firstPage()
 
 // Go to the last page [Not yet implemented]
 self.lastPage()
 
-// Go to the next page [Not yet implemented]
+// Go to the next page
 self.next()
 
-// Go to the previous page [Not yet implemented]
+// Go to the previous page
 self.previous()
 
 // Show first entries based on the set entries per page
