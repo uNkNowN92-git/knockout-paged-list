@@ -12,6 +12,7 @@ It also has a built-in [filtering](#filtering) and [sorting](#sorting) options t
 #Todo
 * Write test scripts
 * Create a demo page
+* Include ASP.NET Web API integration snippets
 
 #Usage
 Include scripts in page:
