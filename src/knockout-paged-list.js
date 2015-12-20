@@ -1,5 +1,5 @@
-var PagedList = function (params) {
-    return function (params) {
+var PagedList = function (option) {
+    return function (option) {
         var self = this;
 
 
@@ -7,11 +7,28 @@ var PagedList = function (params) {
 
         /* Settings/Options variables */
 
-        self.queryOnLoad = params.queryOnLoad !== undefined ? params.queryOnLoad : true;
-        self.defaultEntriesPerPage = params.entriesPerPage || 5;
-        self.defaultUrl = params.url;
+        self.defaultUrl;
+        self.queryOnLoad = true;
+        self.defaultEntriesPerPage = 5;
+
+
+        /* CONFIGURE OPTIONS */
+        
+        function ConfigureOptions() {
+            
+            if (option) {
+                self.defaultUrl = option.url === undefined ? self.defaultUrl : option.url;
+                self.queryOnLoad = option.queryOnLoad === undefined ? self.queryOnLoad : option.queryOnLoad;
+                self.defaultEntriesPerPage = option.entriesPerPage === undefined ? self.defaultEntriesPerPage : option.entriesPerPage;
+            }
+        }
+        
+        ConfigureOptions();
+
+        
+        /* OBSERVABLES */
                
-        /* Paging variables */
+        /* Paging observables */
 
         self.url = ko.observable();
         self.data = ko.observableArray();
@@ -20,17 +37,17 @@ var PagedList = function (params) {
         self.entriesPerPage = ko.observable(self.defaultEntriesPerPage);
         self.totalEntries = ko.observable(0);
    
-        /* Server-related variables */
+        /* Server-related observables */
 
         self.error = ko.observableArray();
         self.loading = ko.observable();
         
-        /* Filtering variables */
+        /* Filtering observables */
 
         self.filter = ko.observableArray();
         self.appliedFilter = ko.observableArray();
 
-        /* Sorting variables */
+        /* Sorting observables */
 
         self.header = ko.observableArray();
         self.sortOnly = ko.observable();
@@ -156,6 +173,7 @@ var PagedList = function (params) {
 
         self.sort = function (column, data, event) {
             if (self.header() === undefined) return;
+            if (self.totalEntries() <= 1) return;
 
             GetDataUrl(event);
 
@@ -194,6 +212,10 @@ var PagedList = function (params) {
         
         /* Paging methods */
 
+        function ShowAll() {
+            return self.requestedPage() === 1 && self.entriesPerPage() === self.totalEntries();
+        }
+        
         function UpdateDisplayedEntries() {
             if (FiltersHasChanged()) {
                 // Request fresh data
@@ -224,7 +246,7 @@ var PagedList = function (params) {
 
             // Use simple comparison to remove dependency on underscore.js
             if (ko.toJSON(currentFilter) != ko.toJSON(self.appliedFilter())) {
-            // if (!_.isEqual(currentFilter, self.appliedFilter())) {
+                // if (!_.isEqual(currentFilter, self.appliedFilter())) {
                 self.appliedFilter(currentFilter);
                 result = true;
             }
@@ -283,10 +305,6 @@ var PagedList = function (params) {
             $.extend(queryOptions, self.filter());
 
             return queryOptions;
-        }
-        
-        function ShowAll() {
-            return self.requestedPage() === 1 && self.entriesPerPage() === self.totalEntries();
         }
 
         function ProcessResponse(response) {
@@ -347,8 +365,8 @@ var PagedList = function (params) {
         
         /* INITIALIZATION */
 
-        function init() {
-
+        function Init() {
+            
             if (self.defaultUrl !== undefined) {
                 self.setUrl(self.defaultUrl);
 
@@ -357,7 +375,8 @@ var PagedList = function (params) {
                     self.getList();
             }
         }
-
-        init();
+        
+        Init();
+        
     };
 } ();
