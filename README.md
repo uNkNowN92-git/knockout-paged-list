@@ -190,35 +190,40 @@ Use the 'data-url' attribute to specify the url to access:
 ##Options
 ```javascript
 /* Configuration options */
-params = {}
+options = {}
 
 // this will be the maximum number entries to show on the current page
-params.entriesPerPage   // [default] = 5
+options.entriesPerPage   // [default] = 5
 
 // this will set the default url to request a query from
-params.url              // [default] = undefined
+options.url              // [default] = undefined
 
 // set to true if you want to perform a query/request on page load
-params.queryOnload      // [default] = true
+options.queryOnload      // [default] = true
 
-PagedList.call(self, params);
+// pass options to PagedList
+PagedList.call(self, options);
 ```
 
+Sample
+```javascript
+
+```
 
 #Variables and Observables 
 
 ##Settings/Options Variables
-Can be set by passing parameter to **PagedList.call** (*self*, **`params`**);
+Can be set by passing parameter to **PagedList.call** (*self*, **`options`**);
 ```javascript
 /* Settings/Options variables */
 
-// set using 'params.url'
+// set using 'options.url'
 self.defaultUrl                 
 
-// set using 'params.entriesPerPage'
+// set using 'options.entriesPerPage'
 self.defaultEntriesPerPage      
 
-// set using 'params.queryOnload'
+// set using 'options.queryOnload'
 self.queryOnLoad                
 ```
 
