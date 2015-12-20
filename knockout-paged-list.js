@@ -31,7 +31,7 @@ var PagedList = function (params) {
         
         // Filtering variable
         
-        self.query = ko.observableArray();
+        self.filter = ko.observableArray();
 
         // Sorting variables
         
@@ -228,7 +228,7 @@ var PagedList = function (params) {
             }
             
             // Query or Filters
-            $.extend(queryOptions, self.query());
+            $.extend(queryOptions, self.filter());
 
             return queryOptions;
         }
