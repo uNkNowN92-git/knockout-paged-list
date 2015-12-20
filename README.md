@@ -104,7 +104,7 @@ Sample bindings to display the paginated data in a table:
 ```
 
 ##Paging <a name="paging">#</a>
-Using the built-in paging bindings in buttons to **navigate** through the list and display **entry count**:
+Use the built-in paging bindings in buttons to **navigate** through the list and display **entry count**:
 ```html
 <div class="pager">
     <button class="btn" data-bind="click: showAll, visible: !shownAll()">
@@ -127,7 +127,7 @@ Using the built-in paging bindings in buttons to **navigate** through the list a
 ```
 
 ##Filtering <a name="filtering">#</a>
-Using the **'filter()'** variable to define a filter:
+Use the **'filter()'** variable to define a filter:
 ```html
 <div class="form-group">
     <label class="control-label" for="name">Name</label>
@@ -148,19 +148,19 @@ Using the **'filter()'** variable to define a filter:
 ##Performing a Query/Request
 
 ###*Simple*
-Using the **'getList'** function to perform request to the server: *(url must be defined in the view model)*
+Use the **'getList'** function to perform request to the server: *(url must be defined in the view model)*
 ```html
 <button data-bind="click: getList" class="btn">Search</button>
 ```
 
 ###*Inline URL*
-Using the **'data-url'** attribute to specify the url to access:
+Use the **'data-url'** attribute to specify the url to access:
 ```html
 <button data-bind="click: getList" data-url="/api/values" class="btn">Search</button>
 ```
 
 ###*Enabling/Disabling button while loading*
-Using the **'loading()'** variable to enable/disable the button while loading:
+Use the **'loading()'** variable to enable/disable the button while loading:
 ```html
 <button data-bind="click: getList, disable: loading" class="btn">Search</button>
 
@@ -178,7 +178,7 @@ Toggle sorting by **columnName**:
 ```
 
 ###*Inline URL*
-Using the 'data-url' attribute to specify the url to access:
+Use the 'data-url' attribute to specify the url to access:
 ```html
 <!-- use 'data-url' attribute to specify url to query different from the 'url' passed to the view model -->
 <td data-bind="click: sort.bind($data, 'column1')" data-url="/api/sorturl">Heading 1</td>
