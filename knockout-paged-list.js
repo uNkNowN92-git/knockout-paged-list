@@ -1,3 +1,31 @@
+/* Polyfill for non-ES6 browsers */
+if (!Object.is) {
+  Object.is = function(x, y) {
+    // SameValue algorithm
+    if (x === y) { // Steps 1-5, 7-10
+      // Steps 6.b-6.e: +0 != -0
+      return x !== 0 || 1 / x === 1 / y;
+    } else {
+      // Step 6.a: NaN == NaN
+      return x !== x && y !== y;
+    }
+  };
+}
+/* End - Polyfill for non-ES6 browsers */
+
+var obj1, obj2;
+
+obj1 = {miles:"123":AvailableVehicle:"32"};
+obj2 = {miles:"123":AvailableVehicle:"32"};
+
+console.log(Object.is(obj1, obj2));
+
+obj2 = {"miles":"123","AvailableVehicle":"322"};
+console.log(Object.is(obj1, obj2));
+
+obj2 = {};
+console.log(Object.is(obj1, obj2));
+
 var PagedList = function (params) {
     return function (params) {
         var self = this;
@@ -217,15 +245,14 @@ var PagedList = function (params) {
         }
 
         function FiltersHasChanged() {
-            var result = false;
             var currentFilter = {};
             $.extend(currentFilter, [self.filter()][0]);
 
             if (!_.isEqual(currentFilter, self.appliedFilter())) {
                 self.appliedFilter(currentFilter);
-                result = true;
+                return true;
             }
-            return result;
+            return false;
         }
 
         function UpdateNeeded() {

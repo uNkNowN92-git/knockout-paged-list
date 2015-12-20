@@ -113,8 +113,8 @@ var PagedList = function (params) {
         /* Paging functions */
 
         self.firstPage = function () {
-            // Not yet implemented
-            // self.currentPage(1);
+            self.requestedPage(1);
+            UpdateDisplayedEntries();
         };
 
         self.lastPage = function () {
@@ -183,6 +183,7 @@ var PagedList = function (params) {
         };
 
         self.getList = function (data, event) {
+            self.requestedPage(1);
             GetDataUrl(event);
 
             UpdateDisplayedEntries();
@@ -221,7 +222,9 @@ var PagedList = function (params) {
             var currentFilter = {};
             $.extend(currentFilter, [self.filter()][0]);
 
-            if (!_.isEqual(currentFilter, self.appliedFilter())) {
+            // Use simple comparison to remove dependency on underscore.js
+            if (ko.toJSON(currentFilter) != ko.toJSON(self.appliedFilter())) {
+            // if (!_.isEqual(currentFilter, self.appliedFilter())) {
                 self.appliedFilter(currentFilter);
                 result = true;
             }
