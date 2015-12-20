@@ -10,6 +10,11 @@ It also has a built-in [filtering](#filtering) and [sorting](#sorting) options t
  [jQuery](https://jquery.com/)  
  [Underscore.js](http://underscorejs.org//)
 
+#Todo
+* Remove underscore js as dependency
+* Write test scripts
+* Create a demo page
+
 #Usage
 Include scripts in page:
 ```html
