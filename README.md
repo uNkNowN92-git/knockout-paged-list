@@ -183,6 +183,26 @@ Using the 'data-url' attribute to specify the url to access:
             
 ```
 
+#Configuration Options
+
+##Options
+```javascript
+/* Configuration options */
+params = {}
+
+// this will be the maximum number entries to show on the current page
+params.entriesPerPage   // [default] = 5
+
+// this will set the default url to request a query from
+params.url              // [default] = undefined
+
+// set to true if you want to perform a query/request on page load
+params.queryOnload      // [default] = true
+
+PagedList.call(self, params);
+```
+
+
 #Variables and Observables 
 
 ##Settings/Options Variables
@@ -190,14 +210,14 @@ Can be set by passing parameter to **PagedList.call** (*self*, **`params`**);
 ```javascript
 /* Settings/Options variables */
 
-// params.queryOnload
-self.queryOnLoad                // [default] = true
+// set using 'params.url'
+self.defaultUrl                 
 
-// params.entriesPerPage
-self.defaultEntriesPerPage      // [default] = 5
+// set using 'params.entriesPerPage'
+self.defaultEntriesPerPage      
 
-// params.url
-self.defaultUrl                 // [default] = undefined
+// set using 'params.queryOnload'
+self.queryOnLoad                
 ```
 
 ##Paging Observables
