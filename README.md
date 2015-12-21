@@ -1,9 +1,10 @@
-#knockout-paged-list
+#knockout-paged-list: A Knockout JS Plugin for Paged List/Grid
 
 #Synopsis
-This project uses **KnockoutJS** to create a [paged/paginated](#paging) list.
+This plugin uses **KnockoutJS** to create a [paged/paginated](#paging) list/grid.
 
-It also has a built-in [filtering](#filtering) and [sorting](#sorting) options to filter the displayed result.
+* Data is [pulled from the server](#perform-request) by page when it is not present using $.getJSON() function. It is automatically invoked when pressing the [next](#paging) button.  
+* It also has a built-in [filtering](#filtering) and [sorting](#sorting) options to filter the displayed result.
 
 #Dependencies
 > [KnockoutJS](http://knockoutjs.com/)  
@@ -146,7 +147,7 @@ Use the **'filter()'** variable to define a filter:
 </div>
 ```
 
-##Performing a Query/Request
+##Performing a Query/Request <a name="perform-request">#</a>
 
 ###*Simple*
 Use the **'getList'** function to perform request to the server: *(url must be defined in the view model)*
@@ -206,10 +207,6 @@ options.queryOnload      // [default] = true
 PagedList.call(self, options);
 ```
 
-Sample
-```javascript
-
-```
 
 #Variables and Observables 
 
