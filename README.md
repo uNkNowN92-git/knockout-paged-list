@@ -91,7 +91,9 @@ Sample bindings to display the paginated data in a table:
             <td></td>
             <!-- use 'data-url' attribute to specify url to query different from the 'url' passed to the view model -->
             <td data-bind="click: sort.bind($data, 'column1')" data-url="/api/sorturl">Heading 1</td>
-            <td data-bind="click: sort.bind($data, 'column2')">Heading 2</td>
+            <!-- use 'data-sort-field' attribute to specify the field to sort when call the 'sort' function -->
+            <td data-bind="click: sort" data-sort-field="availableVehicle">AVAILABLE</td>
+            <!-- another way of defining the field to sort -->
             <td data-bind="click: sort.bind($data, 'column3')">Heading 3</td>
         </tr>
     </thead>
@@ -192,8 +194,17 @@ Use the **'loading()'** variable to enable/disable the button while loading:
 
 
 ##Sorting <a name="sorting">#</a>
-###*Simple*
+
 Toggle sorting by **columnName**:
+
+###*Option 1*
+Using the `data-sort-field` attribute to define the field to sort:
+```html
+<td data-bind="click: sort" data-sort-field="columnName">Heading</td>
+```
+
+###*Option 2*
+Passing the **name of the field to sort** directly to the function:
 ```html
 <td data-bind="click: sort.bind($data, 'columnName')">Heading</td>
 ```
