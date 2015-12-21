@@ -1,7 +1,7 @@
 #knockout-paged-list: A Knockout JS Plugin for Paged List/Grid
 
 #Synopsis
-This plugin uses **KnockoutJS** to create a [paged/paginated](#paging) list/grid.
+This plugin uses **KnockoutJS** to create a [paged/paginated list/grid](#display).
 
 * Data is [pulled from the server](#perform-request) by page when it is not present using $.getJSON() function. It is automatically invoked when pressing the [next](#paging) button.  
 * It also has a built-in [filtering](#filtering) and [sorting](#sorting) options to filter the displayed result.
@@ -61,7 +61,7 @@ var viewModel = new ViewModel({
 // Apply knockout bindings
 ko.applyBindings(viewModel, $("#container-id")[0]); // Use this, if applying multiple bindings in one page
 ```
-##Displaying the Entries
+##Displaying the Entries <a name="display">#</a>
 Sample bindings to display the paginated data in a table:
 ```html
 <!-- Page.html -->
