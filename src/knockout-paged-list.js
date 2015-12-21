@@ -7,7 +7,7 @@ var PagedList = function (option) {
 
         /* Settings/Options variables */
 
-        self.defaultUrl;
+        self.defaultUrl = undefined;
         self.queryOnLoad = true;
         self.defaultEntriesPerPage = 5;
 
