@@ -263,7 +263,7 @@ var PagedList = function (option) {
         // Get value from 'data-url' attribute
         // i.e. <span data-url="sample/url"></span>
         function GetDataUrl(event) {
-            var url = $(event.target).data("url");
+            var url = event !== undefined ? $(event.target).data("url") : undefined;
             self.setUrl(url);
         }
 
