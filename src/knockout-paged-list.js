@@ -263,6 +263,7 @@ var PagedList = function (option) {
                 self.loadedEntriesCount() != self.totalEntries();
         }
         
+        
         /* Server-related methods */
 
         // Get value from 'data-url' attribute
