@@ -14,7 +14,26 @@ It also has a built-in [filtering](#filtering) and [sorting](#sorting) options t
 * Create a demo page
 * Include ASP.NET Web API integration snippets
 
+
 #Usage
+
+##Server-side
+###Expected format of the JSON response from the server: 
+```json
+{
+    "data":[
+        {"columnId": 1, "column1": "value1", "column2": "value2", "column3": "value3"},
+        {"columnId": 2, "column1": "value1", "column2": "value2", "column3": "value3"},
+        {"columnId": 3, "column1": "value1", "column2": "value2", "column3": "value3"},
+        {"columnId": 4, "column1": "value1", "column2": "value2", "column3": "value3"},
+    ],
+    "details":{
+        "totalEntries": 4
+    }
+}
+```
+
+##Client-side
 Include scripts in page:
 ```html
 <!-- Page.html -->
