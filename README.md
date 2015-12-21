@@ -34,6 +34,164 @@ This plugin uses **KnockoutJS** to create a [paged/paginated list/grid](#display
 }
 ```
 
+##Using ASP.NET Web API C♯
+
+###Sample API Controller to handle the request
+```csharp
+public class ValuesController : ApiController
+{
+    // GET: api/values
+    public PagedListResult<MyDataModel> Get([FromUri]MyFilters filters, [FromUri]PagedListQueryOptions pagedListOptions)
+    {
+        var sampleData = new List<MyDataModel>();
+        
+        // TODO: Populate sample data here
+        
+        
+        var data = sampleData.AsQueryable(); // convert list to Queryable
+
+
+        // Filter Name
+        if (!string.IsNullOrEmpty(filters.Name))
+            data = data.Where(x => x.Name == filters.Name);
+
+        // Filter Age
+        if (filters.Age > 0)
+            data = data.Where(x => x.Age == filters.Age);
+        
+        
+        // Details of the result
+        var details = new PagedListDetails()
+        {
+            TotalEntries = data.Count()
+        };
+
+
+        // Sorting
+        var orderBy = pagedListOptions.OrderBy ?? "ColumnId" // Set default column if pagedListOptions.OrderBy is null
+
+
+        // Paged List data
+        var result = data
+            .OrderBy(orderBy)                   // using LINQ Dynamic
+            .Skip(pagedListOptions.Offset)
+            .Take(pagedListOptions.Entries);
+
+        return new PagedListResult<MyDataModel>(result, details);
+    }
+}
+```
+
+###Sample Models to be used handle the request:
+```csharp
+// Model to be used for the paging and sorting of the data
+public class PagedListQueryOptions
+{
+    public PagedListQueryOptions()
+    {
+        // Set default values
+        Page = 1;
+        PerPage = 5;
+        SortAsc = true;
+    }
+    
+    /* Values passed by the getJSON request */
+    
+    // For paging
+
+    public int CurrentEntries { get; set; }
+
+    public int Page { get; set; }
+
+    public int PerPage { get; set; }
+
+    public bool ShowAll { get; set; }
+    
+    // For sorting
+
+    public bool SortOnly { get; set; }
+
+    public bool SortAsc { get; set; }
+
+    public string SortBy { get; set; }
+    
+    
+    // Computed values to produce the desired output
+    
+    public int Offset
+    {
+        get { return SortOnly ? 0 : PerPage * (Page - 1); }
+    }
+
+    public int Entries
+    {
+        get { return SortOnly && CurrentEntries > 0 ? CurrentEntries : PerPage; }
+    }
+    
+    public string OrderBy
+    {
+        get
+        {
+            return string.IsNullOrEmpty(SortBy) ? null : string.Format("{0} {1}", 
+                SortBy, SortAsc ? "ASC" : "DESC");
+        }
+    }
+}
+
+// Model to be used to filter the data
+public class MyFilters
+{
+    public string Name { get; set; }
+    
+    public int Age { get; set; }   
+}
+```
+
+###Sample Models to produce the expected response by the plugin:
+```csharp
+using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
+
+// Return type of the controller method
+// T is the Model of the data to be sent to the client
+public class PagedListResult<T>
+{
+    public PagedListResult(IEnumerable<T> data, PagedListDetails details)
+    {
+        Data = data;
+        Details = details;
+    }
+
+    [JsonProperty(PropertyName = "data")]
+    public IEnumerable<T> Data { get; private set; }
+
+    [JsonProperty(PropertyName = "details")]
+    public PagedListDetails Details { get; private set; }
+}
+
+public class PagedListDetails
+{
+    [JsonProperty(PropertyName = "totalEntries")]
+    public int TotalEntries { get; set; }
+}
+
+// Model of the data to be sent to the client
+public class MyDataModel
+{
+    [JsonProperty(PropertyName = "columnId")]
+    public int ColumnId { get; set; }
+    
+    [JsonProperty(PropertyName = "column1")]
+    public String Column1 { get; set; }
+    
+    [JsonProperty(PropertyName = "column2")]
+    public String Column2 { get; set; }
+    
+    [JsonProperty(PropertyName = "column2")]
+    public String Column3 { get; set; }
+}
+```
+
 ##Client-side
 Include scripts in page:
 ```html
