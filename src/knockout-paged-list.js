@@ -175,8 +175,13 @@ var PagedList = function (option) {
             if (self.header() === undefined) return;
             if (self.totalEntries() <= 1) return;
 
-            GetDataUrl(event);
-
+            if (event !== undefined) {
+                GetDataUrl(event);
+            } else {
+                GetDataUrl(data);
+                column = GetDataSortField(data);
+            }
+            
             if ($.inArray(column, self.header()) !== -1) {
                 var sort = {
                     column: column,
@@ -193,7 +198,7 @@ var PagedList = function (option) {
                 UpdateDisplayedEntries();
             }
         };
-        
+
         /* Server-related functions */
 
         self.setUrl = function (url) {
@@ -266,7 +271,13 @@ var PagedList = function (option) {
             var url = event !== undefined ? $(event.target).data("url") : undefined;
             self.setUrl(url);
         }
-
+        
+        // Get value from 'data-sort-field' attribute
+        // i.e. <button data-sort-field="columnName" data-bind="click: sort"></button>
+        function GetDataSortField(event) {
+            return event !== undefined ? $(event.target).data("sort-field") : undefined;
+        }
+        
         function ExecuteQuery() {
             if (self.url() !== undefined) {
                 self.loading(true);
