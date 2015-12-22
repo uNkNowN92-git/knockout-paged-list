@@ -4,23 +4,19 @@ var jshint     = require('gulp-jshint');
 var concat     = require('gulp-concat');
 var uglify     = require('gulp-uglify');
 var rename     = require('gulp-rename');
-// var minifyCss  = require('gulp-minify-css');
-// var ngAnnotate = require('gulp-ng-annotate');
+var header     = require('gulp-header');
 
-// var styles = [
-//   "src/style/jquery.datetimepicker.css",
-//   "src/style/angular-flash.min.css",
-//   "src/style/normalize.css",
-//   "src/style/fonts.css",
-//   "src/style/base.css",
-// ];
-
+var pkg = 'package.json';
 var scripts = 'src/*.js';
 var filename = 'knockout-paged-list.js';
 
+var banner = '/* Knockout Paged List <%= pkg.version %> */\n';
+banner += '/* <%= pkg.homepage %> */\n';
+banner += '/* by <%= pkg.author %> */\n';
+
 gulp.task('build-script', function () {
   return gulp.src(scripts)
-    // .pipe(concat(filename))
+    .pipe(header(banner, {pkg: pkg}))
     .pipe(gulp.dest(''))
     .pipe(rename({ extname: '.min.js' }))
     .pipe(uglify())
