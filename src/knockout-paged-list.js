@@ -10,24 +10,26 @@ var PagedList = function (option) {
         self.defaultUrl = undefined;
         self.queryOnLoad = true;
         self.defaultEntriesPerPage = 5;
+        self.clearLoadedDataOnError = true;
 
 
         /* CONFIGURE OPTIONS */
-        
+
         function ConfigureOptions() {
-            
+
             if (option) {
-                self.defaultUrl = option.url === undefined ? self.defaultUrl : option.url;
-                self.queryOnLoad = option.queryOnLoad === undefined ? self.queryOnLoad : option.queryOnLoad;
-                self.defaultEntriesPerPage = option.entriesPerPage === undefined ? self.defaultEntriesPerPage : option.entriesPerPage;
+                self.defaultUrl = option.url !== undefined ? option.url : self.defaultUrl;
+                self.queryOnLoad = option.queryOnLoad !== undefined ? option.queryOnLoad : self.queryOnLoad;
+                self.defaultEntriesPerPage = option.entriesPerPage !== undefined ? option.entriesPerPage : self.defaultEntriesPerPage;
+                self.clearLoadedDataOnError = option.clearLoadedDataOnError !== undefined ? option.clearLoadedDataOnError : self.clearLoadedDataOnError;
             }
         }
-        
+
         ConfigureOptions();
 
-        
+
         /* OBSERVABLES */
-               
+
         /* Paging observables */
 
         self.url = ko.observable();
@@ -36,12 +38,12 @@ var PagedList = function (option) {
         self.requestedPage = ko.observable(1);
         self.entriesPerPage = ko.observable(self.defaultEntriesPerPage);
         self.totalEntries = ko.observable(0);
-   
+
         /* Server-related observables */
 
         self.error = ko.observableArray();
         self.loading = ko.observable();
-        
+
         /* Filtering observables */
 
         self.filter = ko.observableArray();
@@ -52,10 +54,10 @@ var PagedList = function (option) {
         self.header = ko.observableArray();
         self.sortOnly = ko.observable();
         self.activeSort = ko.observableArray();
-     
-     
+
+
         /* HELPERS */
-        
+
         /* Paging helpers */
 
         // Entries to display
@@ -110,7 +112,7 @@ var PagedList = function (option) {
         self.totalEntriesOnNextPage = function () {
             return self.requestedPage() * self.entriesPerPage();
         };
-        
+
         /* Server-related helpers */
 
         self.hasError = ko.computed(function () {
@@ -124,9 +126,9 @@ var PagedList = function (option) {
         self.parserError = ko.computed(function () {
             return self.error().status !== undefined ? self.error().status === "parsererror" : false;
         });
-        
+
         /* FUNCTIONS */
-        
+
         /* Paging functions */
 
         self.firstPage = function () {
@@ -168,7 +170,7 @@ var PagedList = function (option) {
 
             UpdateDisplayedEntries();
         };
-        
+
         /* Sort functions */
 
         self.sort = function (column, data, event) {
@@ -181,7 +183,7 @@ var PagedList = function (option) {
                 GetDataUrl(data);
                 column = GetDataSortField(data);
             }
-            
+
             if ($.inArray(column, self.header()) !== -1) {
                 var sort = {
                     column: column,
@@ -214,13 +216,13 @@ var PagedList = function (option) {
 
 
         /* METHODS */
-        
+
         /* Paging methods */
 
         function ShowAll() {
             return self.requestedPage() === 1 && self.entriesPerPage() === self.totalEntries();
         }
-        
+
         function UpdateDisplayedEntries() {
             if (FiltersHasChanged()) {
                 // Request fresh data
@@ -245,7 +247,6 @@ var PagedList = function (option) {
         }
 
         function FiltersHasChanged() {
-            var result = false;
             var currentFilter = {};
             $.extend(currentFilter, [self.filter()][0]);
 
@@ -253,17 +254,17 @@ var PagedList = function (option) {
             if (ko.toJSON(currentFilter) != ko.toJSON(self.appliedFilter())) {
                 // if (!_.isEqual(currentFilter, self.appliedFilter())) {
                 self.appliedFilter(currentFilter);
-                result = true;
+                return true;
             }
-            return result;
+            return false;
         }
 
         function UpdateNeeded() {
             return self.loadedEntriesCount() < self.totalEntriesOnNextPage() &&
                 self.loadedEntriesCount() != self.totalEntries();
         }
-        
-        
+
+
         /* Server-related methods */
 
         // Get value from 'data-url' attribute
@@ -272,13 +273,13 @@ var PagedList = function (option) {
             var url = event !== undefined ? $(event.target).data("url") : undefined;
             self.setUrl(url);
         }
-        
+
         // Get value from 'data-sort-field' attribute
         // i.e. <button data-sort-field="columnName" data-bind="click: sort"></button>
         function GetDataSortField(event) {
             return event !== undefined ? $(event.target).data("sort-field") : undefined;
         }
-        
+
         function ExecuteQuery() {
             if (self.url() !== undefined) {
                 self.loading(true);
@@ -303,7 +304,7 @@ var PagedList = function (option) {
                 currentEntries: self.loadedEntriesCount(),
                 showAll: ShowAll()
             };
-            
+
             // Sorting options
             if (self.activeSort()) {
                 $.extend(queryOptions, {
@@ -312,7 +313,7 @@ var PagedList = function (option) {
                     sortOnly: self.sortOnly()
                 });
             }
-            
+
             // Filtering options
             $.extend(queryOptions, self.filter());
 
@@ -338,7 +339,7 @@ var PagedList = function (option) {
                 ko.utils.arrayPushAll(self.data(), data);
                 self.data.valueHasMutated();
                 // self.data.push.apply(self.data(), response);
-                    
+
                 // Increment page number after loading data so that the
                 // display will not be empty while waiting for the response
                 if (self.currentPage() < self.totalPages())
@@ -371,14 +372,21 @@ var PagedList = function (option) {
                 status: status,
                 error: error
             });
+
+            // Clear applied filters
             self.appliedFilter([]);
+
+            if (self.clearLoadedDataOnError) {
+                // Clear previous laoded data
+                self.data([]);
+            }
         }
-        
-        
+
+
         /* INITIALIZATION */
 
         function Init() {
-            
+
             if (self.defaultUrl !== undefined) {
                 self.setUrl(self.defaultUrl);
 
@@ -387,8 +395,8 @@ var PagedList = function (option) {
                     self.getList();
             }
         }
-        
+
         Init();
-        
+
     };
-} ();
+}();
