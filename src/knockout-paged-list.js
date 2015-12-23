@@ -248,7 +248,7 @@ var PagedList = function (option) {
             }
         }
 
-        function FiltersHasChanged() {            
+        function FiltersHasChanged() {
             var currentFilter = {};
             $.extend(currentFilter, [self.filter()][0]);
 
@@ -258,13 +258,13 @@ var PagedList = function (option) {
                 self.appliedFilter(currentFilter);
                 return true;
             }
-            return false;
+            
+            return self.queryOnFilterChangeOnly === false;
         }
 
         function UpdateNeeded() {
-            return (self.loadedEntriesCount() < self.totalEntriesOnNextPage() &&
-                self.loadedEntriesCount() != self.totalEntries()) ||
-                self.queryOnFilterChangeOnly === false;
+            return self.loadedEntriesCount() < self.totalEntriesOnNextPage() &&
+                self.loadedEntriesCount() != self.totalEntries();
         }
 
 

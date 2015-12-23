@@ -1,6 +1,6 @@
 /**
  * knockout-paged-list - A KnockoutJS Plugin for Paged List/Grid
- * @version v1.0.1
+ * @version v1.0.2
  * @link https://github.com/uNkNowN92-git/knockout-paged-list/
  * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
  * @license ISC
@@ -255,7 +255,7 @@ var PagedList = function (option) {
             }
         }
 
-        function FiltersHasChanged() {            
+        function FiltersHasChanged() {
             var currentFilter = {};
             $.extend(currentFilter, [self.filter()][0]);
 
@@ -265,13 +265,13 @@ var PagedList = function (option) {
                 self.appliedFilter(currentFilter);
                 return true;
             }
-            return false;
+            
+            return self.queryOnFilterChangeOnly === false;
         }
 
         function UpdateNeeded() {
-            return (self.loadedEntriesCount() < self.totalEntriesOnNextPage() &&
-                self.loadedEntriesCount() != self.totalEntries()) ||
-                self.queryOnFilterChangeOnly === false;
+            return self.loadedEntriesCount() < self.totalEntriesOnNextPage() &&
+                self.loadedEntriesCount() != self.totalEntries();
         }
 
 
