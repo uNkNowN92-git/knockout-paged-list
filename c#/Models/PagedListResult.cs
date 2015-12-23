@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNet.Mvc;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
+using PagedList;
 
-namespace MVCTest.Models
+namespace PagedList
 {
-   public partial class PagedListResult<T>
+    public partial class PagedListResult<T>
     {
         public PagedListResult(IEnumerable<T> data, PagedListDetails details)
         {

@@ -41,15 +41,14 @@ This plugin uses **KnockoutJS** to create a [paged/paginated list/grid](#display
 public class ValuesController : ApiController
 {
     // GET: api/values
-    public PagedListResult<MyDataModel> Get([FromUri]MyFilters filters, [FromUri]PagedListQueryOptions pagedListOptions)
+    public PagedListResult<object> Get([FromUri]MyFilters filters, [FromUri]PagedListOptions pagedListOptions)
     {
         var sampleData = new List<MyDataModel>();
         
         // TODO: Populate sample data here
         
         
-        var data = sampleData.AsQueryable(); // convert list to Queryable
-
+        var data = sampleData.AsEnumerable(); // convert list to Enumerable
 
         // Filter Name
         if (!string.IsNullOrEmpty(filters.Name))
@@ -59,25 +58,13 @@ public class ValuesController : ApiController
         if (filters.Age > 0)
             data = data.Where(x => x.Age == filters.Age);
         
+        // define default field to sort
+        pagedListOptions.SortBy = pagedListOptions.SortBy ?? "VehicleID";
+
+        // convert to PagedListResult
+        var pagedList = result.ToPagedListResult(pagedListOptions);
         
-        // Details of the result
-        var details = new PagedListDetails()
-        {
-            TotalEntries = data.Count()
-        };
-
-
-        // Sorting
-        var orderBy = pagedListOptions.OrderBy ?? "ColumnId" // Set default column if pagedListOptions.OrderBy is null
-
-
-        // Paged List data
-        var result = data
-            .OrderBy(orderBy)                   // using LINQ Dynamic
-            .Skip(pagedListOptions.Offset)
-            .Take(pagedListOptions.Entries);
-
-        return new PagedListResult<MyDataModel>(result, details);
+        return pagedList;
     }
 }
 ```
@@ -85,9 +72,9 @@ public class ValuesController : ApiController
 ###Sample Models to be used handle the request:
 ```csharp
 // Model to be used for the paging and sorting of the data
-public class PagedListQueryOptions
+public class PagedListOptions
 {
-    public PagedListQueryOptions()
+    public PagedListOptions()
     {
         // Set default values
         Page = 1;
@@ -118,7 +105,7 @@ public class PagedListQueryOptions
     
     // Computed values to produce the desired output
     
-    public int Offset
+    public int Start
     {
         get { return SortOnly ? 0 : PerPage * (Page - 1); }
     }
@@ -189,6 +176,35 @@ public class MyDataModel
     
     [JsonProperty(PropertyName = "column2")]
     public String Column3 { get; set; }
+}
+```
+
+###Sample Extension to convert the IEnumberable data to PagedListResult
+```csharp
+public static class PagedListExtension
+{
+    public static PagedListResult<object> ToPagedListResult(this IQueryable<object> data, PagedListOptions pagedListOptions)
+    {
+        // sort the data
+        if (!string.IsNullOrEmpty(pagedListOptions.OrderBy))
+        {
+            data = data.OrderBy(pagedListOptions.OrderBy);  // using LINQ Dynamic
+        }
+
+        // get the entries of the specified page
+        var pagedList = data
+            .Skip(pagedListOptions.Start)
+            .Take(pagedListOptions.Entries);
+
+        // get details of the data
+        var details = new PagedListDetails()
+        {
+            TotalEntries = data.Count()
+        };
+        
+        // return the result
+        return new PagedListResult<object>(pagedList, details);
+    }
 }
 ```
 

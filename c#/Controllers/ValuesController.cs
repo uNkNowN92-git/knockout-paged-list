@@ -16,7 +16,7 @@ namespace MVCTest.Controllers
         // GET: api/values
         [HttpGet]
         //public PagedListQueryOptions Get(CarShareQueryOptions carShareQuery, PagedListQueryOptions queryOptions)
-        public PagedListResult<BookVehicleModel> Get(CarShareQueryOptions carShareQuery, PagedListQueryOptions queryOptions)
+        public PagedListResult<object> Get(CarShareQueryOptions carShareQuery, PagedListQueryOptions queryOptions)
         {
             var data = new List<BookVehicleModel>();
             data.Add(
@@ -68,76 +68,17 @@ namespace MVCTest.Controllers
 
             var result = data.AsQueryable();
 
+            // filter the result
             if (carShareQuery.Miles > 0)
                 result = result.Where(x => x.DistanceLocation <= carShareQuery.Miles);
 
-            var details = new PagedListDetails()
-            {
-                TotalEntries = result.Count()
-            };
+            // define default field to sort
+            pagedListOptions.SortBy = pagedListOptions.SortBy ?? "VehicleID";
 
-            // if (!string.IsNullOrEmpty(queryOptions.SortBy))
-            // {
-            //     var column = PagedListServices.GetNameFromJsonProperty<BookVehicleModel>(queryOptions.SortBy);
-
-            //     if (!string.IsNullOrEmpty(column))
-            //     {
-            //         string orderByQuery = column + " " + (queryOptions.SortAsc == true ? "ASC" : "DESC");
-
-            if (!string.IsNullOrEmpty(queryOptions.OrderBy))
-            {
-                // result = result.OrderBy(queryOptions.OrderBy); // USE LINQ DYNAMIC
-                
-                // TESTING
-                if (queryOptions.SortAsc)
-                    result = result.OrderBy(x => x.AvailableVehicle);
-                else
-                    result = result.OrderByDescending(x => x.AvailableVehicle);
-            }
-            //     }
-            // }
-
-            var queryResult = result
-                .Skip(queryOptions.Offset)
-                .Take(queryOptions.Entries);
-
-            //return queryOptions;
-            return new PagedListResult<BookVehicleModel>(queryResult, details);
-        }
-
-        public ActionResult Index()
-        {
-            return View();
-        }
-
-        // // GET api/values/5
-        // [HttpGet("{id}")]
-        // public string Get(int id)
-        // {
-        //     List<string> names = new List<string>();
-        //     for (int i = 0; i < 25; i++)
-        //     {
-        //         names.Add(Faker.Name.FullName());
-        //     }
-        //     return string.Join(",", names.ToArray());
-        // }
-
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody]string value)
-        {
-        }
-
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            // convert IQueryable to PagedListResult
+            var pagedList = result.ToPagedListResult(pagedListOptions);
+            
+            return pagedList;
         }
     }
 }

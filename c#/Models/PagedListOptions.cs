@@ -9,25 +9,25 @@ using Newtonsoft.Json;
 using System.Collections.Specialized;
 using System.Reflection;
 
-namespace MVCTest.Models
+namespace PagedList
 {
-    public class PagedListQueryOptions
+    public class PagedListOptions
     {
 
-        public PagedListQueryOptions()
+        public PagedListOptions()
         {
             Page = 1;
             PerPage = 5;
             SortAsc = true;
         }
 
-        // [JsonIgnore]
-        public int Offset
+        [JsonProperty(PropertyName = "start")]
+        public int Start
         {
             get { return SortOnly ? 0 : PerPage * (Page - 1); }
         }
 
-        // [JsonIgnore]
+        [JsonProperty(PropertyName = "entries")]
         public int Entries
         {
             get { return SortOnly && CurrentEntries > 0 ? CurrentEntries : PerPage; }
@@ -54,7 +54,7 @@ namespace MVCTest.Models
         [JsonProperty(PropertyName = "sortBy")]
         public string SortBy { get; set; }
         
-        // [JsonIgnore]
+        [JsonIgnore]
         public string OrderBy
         {
             get

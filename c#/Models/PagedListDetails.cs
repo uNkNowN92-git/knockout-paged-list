@@ -7,9 +7,9 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
-namespace MVCTest.Models
+namespace PagedList
 {
-    public partial class PagedListDetails
+    public class PagedListDetails
     {
         [JsonProperty(PropertyName = "totalEntries")]
         public int TotalEntries { get; set; }
