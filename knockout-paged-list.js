@@ -1,3 +1,9 @@
+/**
+ * knockout-paged-list - Paged List Library using KnockoutJS and jQuery
+ * @version v1.0.0
+ * @link https://github.com/uNkNowN92-git/knockout-paged-list/
+ * @license ISC
+ */
 var PagedList = function (option) {
     return function (option) {
         var self = this;
