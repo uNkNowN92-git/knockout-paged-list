@@ -11,7 +11,7 @@ var PagedList = function (option) {
         self.queryOnLoad = true;
         self.defaultEntriesPerPage = 5;
         self.clearLoadedDataOnError = false;
-        self.queryOnFilterChangeOnly = false;
+        self.queryOnFilterChangeOnly = true;
 
 
         /* CONFIGURE OPTIONS */
@@ -232,6 +232,9 @@ var PagedList = function (option) {
                 self.entriesPerPage(self.defaultEntriesPerPage);
                 ExecuteQuery();
                   
+            } else if (self.queryOnFilterChangeOnly === false) {
+                ExecuteQuery();
+
             } else if (self.sortOnly()) {
                 // Request sorted data
                 ExecuteQuery();
@@ -259,7 +262,7 @@ var PagedList = function (option) {
                 return true;
             }
             
-            return self.queryOnFilterChangeOnly === false;
+            return false;
         }
 
         function UpdateNeeded() {
