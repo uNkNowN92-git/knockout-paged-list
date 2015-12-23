@@ -1,0 +1,25 @@
+{
+  "name": "knockout-paged-list",
+  "version": "1.0.0",
+  "description": "Paged List Library using KnockoutJS and jQuery",
+  "main": "knockout-paged-list.js",
+  "authors": [
+    "uNkNowN92"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "knockout",
+    "paged",
+    "list",
+    "grid"
+  ],
+  "homepage": "https://github.com/uNkNowN92-git/knockout-paged-list",
+  "moduleType": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
