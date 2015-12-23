@@ -179,7 +179,7 @@ public class MyDataModel
 }
 ```
 
-###Sample Extension to convert the IEnumberable data to PagedListResult
+###Sample Extension to convert the IQueryable data to PagedListResult
 ```csharp
 public static class PagedListExtension
 {
