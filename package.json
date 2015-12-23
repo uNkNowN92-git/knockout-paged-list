@@ -1,12 +1,13 @@
 {
   "name": "knockout-paged-list",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Paged List Library using KnockoutJS and jQuery",
   "author": "uNkNowN92",
   "homepage": "https://github.com/uNkNowN92-git/knockout-paged-list/",
   "repository":
-  { "type" : "git"
-  , "url" : "https://github.com/uNkNowN92-git/knockout-paged-list.git"
+  { 
+    "type" : "git",
+    "url" : "https://github.com/uNkNowN92-git/knockout-paged-list.git"
   },
   "license": "ISC",
   "devDependencies": {
