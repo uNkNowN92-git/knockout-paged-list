@@ -238,7 +238,7 @@ var PagedList = function (option) {
                 self.requestedPage(1);
                 self.entriesPerPage(self.defaultEntriesPerPage);
                 ExecuteQuery();
-
+                  
             } else if (self.sortOnly()) {
                 // Request sorted data
                 ExecuteQuery();
@@ -255,9 +255,7 @@ var PagedList = function (option) {
             }
         }
 
-        function FiltersHasChanged() {
-            if (self.queryOnFilterChangeOnly === false) return true;
-            
+        function FiltersHasChanged() {            
             var currentFilter = {};
             $.extend(currentFilter, [self.filter()][0]);
 
@@ -271,8 +269,9 @@ var PagedList = function (option) {
         }
 
         function UpdateNeeded() {
-            return self.loadedEntriesCount() < self.totalEntriesOnNextPage() &&
-                self.loadedEntriesCount() != self.totalEntries();
+            return (self.loadedEntriesCount() < self.totalEntriesOnNextPage() &&
+                self.loadedEntriesCount() != self.totalEntries()) ||
+                self.queryOnFilterChangeOnly === false;
         }
 
 
