@@ -263,13 +263,13 @@ Sample bindings to display the paginated data in a table:
 <table class="table">
     <thead>
         <tr>
-            <td></td>
+            <th></th>
             <!-- use 'data-url' attribute to specify url to query different from the 'url' passed to the view model -->
-            <td data-bind="click: sort.bind($data, 'column1')" data-url="/api/sorturl">Heading 1</td>
+            <th data-bind="click: sort.bind($data, 'column1')" data-url="/api/sorturl">Heading 1</th>
             <!-- use 'data-sort-field' attribute to specify the field to sort when call the 'sort' function -->
-            <td data-bind="click: sort" data-sort-field="availableVehicle">AVAILABLE</td>
+            <th data-bind="click: sort" data-sort-field="availableVehicle">AVAILABLE</th>
             <!-- another way of defining the field to sort -->
-            <td data-bind="click: sort.bind($data, 'column3')">Heading 3</td>
+            <th data-bind="click: sort.bind($data, 'column3')">Heading 3</th>
         </tr>
     </thead>
     
