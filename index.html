@@ -6,7 +6,7 @@
     <title>knockout-paged-list by uNkNowN92-git</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet" type="text/css">
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/demo.css" media="screen">
@@ -33,7 +33,7 @@
             <code>gh-pages</code> branch locally. If you’re using GitHub Desktop, simply sync your repository and you’ll
             see the new branch.</p>
 
-        <div id="demo">
+        <div id="demo" style="display: none" data-bind="visible: ready">
             
             <div id="filters">
                 <div class="form-group">
@@ -104,7 +104,7 @@
                 <button class="btn" data-bind="click: showAll, visible: !shownAll()">
                     Show all <span data-bind="text: totalEntries"></span> available entries
                 </button>
-                <button class="btn hidden" data-bind="click: showFirstEntries, enable: showFirstEntriesEnabled, visible: shownAll">
+                <button class="btn" data-bind="click: showFirstEntries, enable: showFirstEntriesEnabled, visible: shownAll">
                     Show first <span data-bind="text: firstEntriesCount"></span> available entries
                 </button>
                 <button class="btn" data-bind="click: previous, enable: previousEnabled">

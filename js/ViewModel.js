@@ -12,6 +12,8 @@ var ViewModel = function (options) {
     self.validInput = ko.computed(function () {
         return self.selectedItem() !== null;
     });
+    
+    self.ready = ko.observable(true);
 }
 
 var viewModel = new ViewModel({
