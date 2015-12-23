@@ -41,13 +41,13 @@ This plugin uses **KnockoutJS** to create a [paged/paginated list/grid](#display
 public class ValuesController : ApiController
 {
     // GET: api/values
-    public PagedListResult<object> Get([FromUri]MyFilters filters, [FromUri]PagedListOptions pagedListOptions)
+    public PagedListResult<MyDataModel> Get([FromUri]MyFilters filters, [FromUri]PagedListOptions pagedListOptions)
     {
         var sampleData = new List<MyDataModel>();
-        
+
         // TODO: Populate sample data here
-        
-        
+
+
         var data = sampleData.AsEnumerable(); // convert list to Enumerable
 
         // Filter Name
@@ -57,13 +57,13 @@ public class ValuesController : ApiController
         // Filter Age
         if (filters.Age > 0)
             data = data.Where(x => x.Age == filters.Age);
-        
+
         // define default field to sort
         pagedListOptions.SortBy = pagedListOptions.SortBy ?? "VehicleID";
 
         // convert to PagedListResult
-        var pagedList = result.ToPagedListResult(pagedListOptions);
-        
+        var pagedList = data.ToPagedListResult(pagedListOptions);
+
         return pagedList;
     }
 }
@@ -183,7 +183,7 @@ public class MyDataModel
 ```csharp
 public static class PagedListExtension
 {
-    public static PagedListResult<object> ToPagedListResult(this IQueryable<object> data, PagedListOptions pagedListOptions)
+    public static PagedListResult<T> ToPagedListResult<T>(this IQueryable<T> data, PagedListOptions pagedListOptions)
     {
         // sort the data
         if (!string.IsNullOrEmpty(pagedListOptions.OrderBy))
@@ -203,7 +203,7 @@ public static class PagedListExtension
         };
         
         // return the result
-        return new PagedListResult<object>(pagedList, details);
+        return new PagedListResult<T>(pagedList, details);
     }
 }
 ```
