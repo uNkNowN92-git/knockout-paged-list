@@ -490,6 +490,11 @@ options.queryOnload              // [default] = true
 // previous data loaded will be cleared when an error occurs when set to true
 options.clearLoadedDataOnError   // [default] = true
 
+// if set to true, it will only perform a request if the filters have changed
+// useful for static data
+self.queryOnFilterChangeOnly     // [default] = false
+
+
 // pass options to PagedList
 PagedList.call(self, options);
 ```
@@ -509,7 +514,13 @@ self.defaultUrl
 self.defaultEntriesPerPage      
 
 // set using 'options.queryOnload'
-self.queryOnLoad                
+self.queryOnLoad              
+
+// set using 'options.clearLoadedDataOnError'
+options.clearLoadedDataOnError
+
+// set using 'options.queryOnFilterChangeOnly'
+self.queryOnFilterChangeOnly
 ```
 
 ##Paging Observables

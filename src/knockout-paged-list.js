@@ -11,6 +11,7 @@ var PagedList = function (option) {
         self.queryOnLoad = true;
         self.defaultEntriesPerPage = 5;
         self.clearLoadedDataOnError = false;
+        self.queryOnFilterChangeOnly = false;
 
 
         /* CONFIGURE OPTIONS */
@@ -22,6 +23,7 @@ var PagedList = function (option) {
                 self.queryOnLoad = option.queryOnLoad !== undefined ? option.queryOnLoad : self.queryOnLoad;
                 self.defaultEntriesPerPage = option.entriesPerPage !== undefined ? option.entriesPerPage : self.defaultEntriesPerPage;
                 self.clearLoadedDataOnError = option.clearLoadedDataOnError !== undefined ? option.clearLoadedDataOnError : self.clearLoadedDataOnError;
+                self.queryOnFilterChangeOnly = option.queryOnFilterChangeOnly !== undefined ? option.queryOnFilterChangeOnly : self.queryOnFilterChangeOnly;
             }
         }
 
@@ -247,6 +249,8 @@ var PagedList = function (option) {
         }
 
         function FiltersHasChanged() {
+            if (self.queryOnFilterChangeOnly === false) return true;
+            
             var currentFilter = {};
             $.extend(currentFilter, [self.filter()][0]);
 
