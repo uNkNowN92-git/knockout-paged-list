@@ -1,0 +1,33 @@
+#demo #filters * {
+    display: inline-block;
+}
+
+#demo [disabled] {
+    cursor: not-allowed;
+}
+
+#demo th span {
+    cursor: pointer;
+}
+
+#demo input {
+    padding: 0.3em 0.5em;
+    border-radius: 4px;
+    border: 1px solid;
+    margin-right: 7px;
+}
+
+#demo table {
+    display: table;
+    margin-bottom: 15px;
+}
+
+#demo button {
+    color: #606c71;
+    border-color: #606c71;
+    padding: 0.3em 1em;
+}
+
+#demo .pager {
+    text-align: center;
+}
