@@ -1,6 +1,6 @@
 /**
- * knockout-paged-list - Paged List Library using KnockoutJS and jQuery
- * @version v1.0.0
+ * knockout-paged-list - A KnockoutJS Plugin for Paged List/Grid
+ * @version v1.0.1
  * @link https://github.com/uNkNowN92-git/knockout-paged-list/
  * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
  * @license ISC
