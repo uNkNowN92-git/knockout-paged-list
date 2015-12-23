@@ -4,7 +4,10 @@
   "description": "Paged List Library using KnockoutJS and jQuery",
   "author": "uNkNowN92",
   "homepage": "https://github.com/uNkNowN92-git/knockout-paged-list/",
-  "repository": "https://github.com/uNkNowN92-git/knockout-paged-list/",
+  "repository":
+  { "type" : "git"
+  , "url" : "https://github.com/uNkNowN92-git/knockout-paged-list.git"
+  },
   "license": "ISC",
   "devDependencies": {
     "eslint-config-standard": "^4.4.0",
