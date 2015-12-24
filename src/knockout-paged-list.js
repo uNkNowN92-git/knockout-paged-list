@@ -290,6 +290,7 @@ var PagedList = function (option) {
         function ExecuteQuery() {
             if (self.url() !== undefined) {
                 self.loading(true);
+                self.error([]);
 
                 var queryOptions = BuildQueryOptions();
 
