@@ -573,8 +573,8 @@ self.appliedFilter()
 ```javascript
 /* Sorting observables */
 
-// array of the header of loaded data
-self.header()
+// array of the columns of loaded data
+self.columns()
 
 // set to true to perform sort retaining the current number of loaded entries/result
 self.sortOnly()
