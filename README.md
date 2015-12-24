@@ -550,6 +550,9 @@ self.totalEntries()
 ```javascript
 /* Server-related observables */
 
+// object containing the headers of the request
+self.headers()
+
 // array containing the error after performing a request using $getJSON()
 self.error()
 
