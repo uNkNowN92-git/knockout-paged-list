@@ -232,7 +232,7 @@ var PagedList = function (option) {
                 self.requestedPage(1);
                 self.entriesPerPage(self.defaultEntriesPerPage);
                 ExecuteQuery();
-                  
+
             } else if (self.queryOnFilterChangeOnly === false) {
                 ExecuteQuery();
 
@@ -262,7 +262,7 @@ var PagedList = function (option) {
                 self.appliedFilter(currentFilter);
                 return true;
             }
-            
+
             return false;
         }
 
@@ -293,14 +293,30 @@ var PagedList = function (option) {
 
                 var queryOptions = BuildQueryOptions();
 
-                $.getJSON(self.url(), queryOptions, function (response) {
-
-                    ProcessResponse(response);
-
-                }).fail(ProcessError).always(function () {
+                $.ajax({
+                    url: self.url(),
+                    method: 'get',
+                    dataType: 'json',
+                    data: queryOptions,
+                    success: ProcessResponse,
+                    error: ProcessError,
+                    beforeSend: SetHeader
+                }).always(function () {
                     self.loading(false);
                 });
+                // $.getJSON(self.url(), queryOptions, function (response) {
+
+                //     ProcessResponse(response);
+
+                // }).fail(ProcessError).always(function () {
+                //     self.loading(false);
+                // });
             }
+        }
+
+        function SetHeader (xhr) {
+            xhr.setRequestHeader('Authorization', 'Basic faskd52352rwfsdfs');
+            xhr.setRequestHeader('X-PartnerKey', '3252352-sdgds-sdgd-dsgs-sgs332fs3f');
         }
 
         function BuildQueryOptions() {
