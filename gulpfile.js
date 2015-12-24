@@ -20,7 +20,7 @@ var banner = ['/**',
   ' */',
   ''].join('\n');
   
-gulp.task('build-script', function () {
+gulp.task('build', function () {
     return gulp.src(scripts)
         .pipe(header(banner, { pkg : pkg } ))
         .pipe(gulp.dest(''))
@@ -37,7 +37,7 @@ gulp.task('lint', function () {
 });
 
 gulp.task('watch', function () {
-    gulp.watch(scripts, ['lint', 'build-script']);
+    gulp.watch(scripts, ['lint']);
 });
 
-gulp.task('default', ['lint', 'build-script', 'watch']);
+gulp.task('default', ['lint', 'watch']);
