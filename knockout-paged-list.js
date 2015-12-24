@@ -1,6 +1,6 @@
 /**
  * knockout-paged-list - A KnockoutJS Plugin for Paged List/Grid
- * @version v1.0.2
+ * @version v1.0.3
  * @link https://github.com/uNkNowN92-git/knockout-paged-list/
  * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
  * @license ISC
@@ -50,6 +50,7 @@ var PagedList = function (option) {
 
         /* Server-related observables */
 
+        self.headers = ko.observableArray();
         self.error = ko.observableArray();
         self.loading = ko.observable();
 
@@ -60,7 +61,7 @@ var PagedList = function (option) {
 
         /* Sorting observables */
 
-        self.header = ko.observableArray();
+        self.columns = ko.observableArray();
         self.sortOnly = ko.observable();
         self.activeSort = ko.observableArray();
 
@@ -183,7 +184,7 @@ var PagedList = function (option) {
         /* Sort functions */
 
         self.sort = function (column, data, event) {
-            if (self.header() === undefined) return;
+            if (self.columns() === undefined) return;
             if (self.totalEntries() <= 1) return;
 
             if (event !== undefined) {
@@ -193,7 +194,7 @@ var PagedList = function (option) {
                 column = GetDataSortField(data);
             }
 
-            if ($.inArray(column, self.header()) !== -1) {
+            if ($.inArray(column, self.columns()) !== -1) {
                 var sort = {
                     column: column,
                     asc: true
@@ -238,7 +239,7 @@ var PagedList = function (option) {
                 self.requestedPage(1);
                 self.entriesPerPage(self.defaultEntriesPerPage);
                 ExecuteQuery();
-                  
+
             } else if (self.queryOnFilterChangeOnly === false) {
                 ExecuteQuery();
 
@@ -268,7 +269,7 @@ var PagedList = function (option) {
                 self.appliedFilter(currentFilter);
                 return true;
             }
-            
+
             return false;
         }
 
@@ -299,14 +300,30 @@ var PagedList = function (option) {
 
                 var queryOptions = BuildQueryOptions();
 
-                $.getJSON(self.url(), queryOptions, function (response) {
-
-                    ProcessResponse(response);
-
-                }).fail(ProcessError).always(function () {
+                $.ajax({
+                    url: self.url(),
+                    method: 'get',
+                    dataType: 'json',
+                    data: queryOptions,
+                    success: ProcessResponse,
+                    error: ProcessError,
+                    beforeSend: SetHeader
+                }).always(function () {
                     self.loading(false);
                 });
+                // $.getJSON(self.url(), queryOptions, function (response) {
+
+                //     ProcessResponse(response);
+
+                // }).fail(ProcessError).always(function () {
+                //     self.loading(false);
+                // });
             }
+        }
+
+        function SetHeader (xhr) {
+            xhr.setRequestHeader('Authorization', 'Basic faskd52352rwfsdfs');
+            xhr.setRequestHeader('X-PartnerKey', '3252352-sdgds-sdgd-dsgs-sgs332fs3f');
         }
 
         function BuildQueryOptions() {
@@ -371,11 +388,11 @@ var PagedList = function (option) {
         }
 
         // Used in determining whether column to be sort is valid
-        // or existing in the header array
+        // or existing in the columns array
         function ExtractHeader(data) {
-            if (self.header().length === 0) {
-                var header = $.map(data, function (v, i) { return i; });
-                self.header(header);
+            if (self.columns().length === 0) {
+                var columns = $.map(data, function (v, i) { return i; });
+                self.columns(columns);
             }
         }
 
@@ -412,4 +429,4 @@ var PagedList = function (option) {
         Init();
 
     };
-}();
+} ();
