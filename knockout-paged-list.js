@@ -12,14 +12,11 @@ var PagedList = function (option) {
 
         /* PROTOTYPES */
 
-        Object.defineProperty(Array.prototype, "updateItems", {
-            enumerable: false,
-            value: function (index, newItems) {
-                if (newItems === undefined) return;
+        Array.prototype.updateItems = function (index, newItems) {
+            if (newItems === undefined) return;
 
-                Array.prototype.splice.apply(this, [index, newItems.length].concat(newItems));
-            }
-        });
+            Array.prototype.splice.apply(this, [index, newItems.length].concat(newItems));
+        };
 
 
         /* VARIABLES */
@@ -31,6 +28,10 @@ var PagedList = function (option) {
         self.defaultEntriesPerPage = 5;
         self.clearLoadedDataOnError = false;
         self.queryOnFilterChangeOnly = true;
+
+        /* Server-related variables */
+
+        self.request = undefined;
 
 
         /* CONFIGURE OPTIONS */
@@ -74,7 +75,7 @@ var PagedList = function (option) {
         /* Sorting observables */
 
         self.columns = ko.observableArray();
-        self.sortOnly = ko.observable();
+        self.sortOnly = ko.observable(false);
         self.activeSort = ko.observableArray();
 
 
@@ -246,6 +247,7 @@ var PagedList = function (option) {
         }
 
         function UpdateDisplayedEntries() {
+            // Order by priority
             if (FiltersHasChanged()) {
                 // Request fresh data
                 self.requestedPage(1);
@@ -253,13 +255,13 @@ var PagedList = function (option) {
                 ExecuteQuery();
 
             } else if (self.queryOnFilterChangeOnly === false) {
+                // Request on filter change only
                 ExecuteQuery();
 
             } else if (self.sortOnly()) {
                 // Request sorted data
                 ExecuteQuery();
 
-                self.sortOnly(false);
             } else if (UpdateNeeded()) {
                 // Request additional data
                 ExecuteQuery();
@@ -308,12 +310,13 @@ var PagedList = function (option) {
 
         function ExecuteQuery() {
             if (self.url() !== undefined) {
+                CancelPreviousRequest();
                 self.loading(true);
                 self.error([]);
 
                 var queryOptions = BuildQueryOptions();
 
-                $.ajax({
+                self.request = $.ajax({
                     url: self.url(),
                     method: 'get',
                     dataType: 'json',
@@ -324,13 +327,12 @@ var PagedList = function (option) {
                 }).always(function () {
                     self.loading(false);
                 });
-                // $.getJSON(self.url(), queryOptions, function (response) {
+            }
+        }
 
-                //     ProcessResponse(response);
-
-                // }).fail(ProcessError).always(function () {
-                //     self.loading(false);
-                // });
+        function CancelPreviousRequest() {
+            if (self.request && self.request.readyState !== 4) {
+                self.request.abort();
             }
         }
 
@@ -361,6 +363,7 @@ var PagedList = function (option) {
             // Filtering options
             $.extend(queryOptions, self.filter());
 
+            delete queryOptions.updateItems;
             return queryOptions;
         }
 
@@ -383,7 +386,12 @@ var PagedList = function (option) {
             data.updateItems(0, self.data());
 
             // update items from response data
-            data.updateItems(GetRequestedPageStartIndex(), response.data);
+            if (self.sortOnly()) {
+                data.updateItems(0, response.data);
+                self.sortOnly(false);
+            } else {
+                data.updateItems(GetRequestedPageStartIndex(), response.data);
+            }
 
             // update ko data
             self.data(data);
@@ -392,21 +400,20 @@ var PagedList = function (option) {
             ExtractColumns(data[0]);
         }
 
+        // Used in determining whether column to be sort is valid
+        // or existing in the columns array
+        function ExtractColumns(data) {
+            if (self.columns().length === 0 || self.queryOnFilterChangeOnly === false) {
+                var columns = $.map(data, function (v, i) { return i; });
+                self.columns(columns);
+            }
+        }
+
         function ProcessResponseDetails(details) {
             if (details.totalEntries === 0) {
                 self.data([]);
             }
             self.totalEntries(details.totalEntries);
-        }
-
-        // Used in determining whether column to be sort is valid
-        // or existing in the columns array
-        function ExtractColumns(data) {
-            if ((self.columns().length === 0 || self.queryOnFilterChangeOnly === false) &&
-                data !== undefined) {
-                var columns = $.map(data, function (v, i) { return i; });
-                self.columns(columns);
-            }
         }
 
         function ProcessError(jqXHR, status, error) {
@@ -434,7 +441,7 @@ var PagedList = function (option) {
         }
 
         function CreateEmptyObjectArray(size) {
-            return Array.apply(null, Array(size)).map(function () { return {}; });
+            return $.map(Array.apply(null, Array(size)), function () { return {}; });
         }
 
         function NotEmptyItemsCount(array) {
