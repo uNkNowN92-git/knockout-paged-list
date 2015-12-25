@@ -1,6 +1,6 @@
 /**
  * knockout-paged-list - A KnockoutJS Plugin for Paged List/Grid
- * @version v1.0.4
+ * @version v1.0.5
  * @link https://github.com/uNkNowN92-git/knockout-paged-list/
  * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
  * @license ISC
@@ -8,6 +8,18 @@
 var PagedList = function (option) {
     return function (option) {
         var self = this;
+
+
+        /* PROTOTYPES */
+
+        Object.defineProperty(Array.prototype, "updateItems", {
+            enumerable: false,
+            value: function (index, newItems) {
+                if (newItems === undefined) return;
+
+                Array.prototype.splice.apply(this, [index, newItems.length].concat(newItems));
+            }
+        });
 
 
         /* VARIABLES */
@@ -30,7 +42,7 @@ var PagedList = function (option) {
                 self.queryOnLoad = option.queryOnLoad !== undefined ? option.queryOnLoad : self.queryOnLoad;
                 self.defaultEntriesPerPage = option.entriesPerPage !== undefined ? option.entriesPerPage : self.defaultEntriesPerPage;
                 self.clearLoadedDataOnError = option.clearLoadedDataOnError !== undefined ? option.clearLoadedDataOnError : self.clearLoadedDataOnError;
-                // self.queryOnFilterChangeOnly = option.queryOnFilterChangeOnly !== undefined ? option.queryOnFilterChangeOnly : self.queryOnFilterChangeOnly;
+                self.queryOnFilterChangeOnly = option.queryOnFilterChangeOnly !== undefined ? option.queryOnFilterChangeOnly : self.queryOnFilterChangeOnly;
             }
         }
 
@@ -72,7 +84,7 @@ var PagedList = function (option) {
 
         // Entries to display
         self.entries = ko.computed(function () {
-            var first = (self.currentPage() - 1) * self.entriesPerPage();
+            var first = GetCurrentPageStartIndex();
             return self.data.slice(first, first + self.entriesPerPage());
         });
 
@@ -112,7 +124,7 @@ var PagedList = function (option) {
         });
 
         self.loadedEntriesCount = ko.computed(function () {
-            return self.data().length;
+            return NotEmptyItemsCount(self.data());
         });
 
         self.shownAll = ko.computed(function () {
@@ -322,9 +334,10 @@ var PagedList = function (option) {
             }
         }
 
-        function SetHeader (xhr) {
-            xhr.setRequestHeader('Authorization', 'Basic faskd52352rwfsdfs');
-            xhr.setRequestHeader('X-PartnerKey', '3252352-sdgds-sdgd-dsgs-sgs332fs3f');
+        function SetHeader(xhr) {
+            $.each(self.headers(), function (key, value) {
+                xhr.setRequestHeader(key, value);
+            });
         }
 
         function BuildQueryOptions() {
@@ -353,7 +366,7 @@ var PagedList = function (option) {
 
         function ProcessResponse(response) {
             if (response.data.length > 0) {
-                ProcessResponseData(response.data);
+                ProcessResponseData(response);
 
                 // Update current page to requested page
                 self.currentPage(self.requestedPage());
@@ -363,22 +376,20 @@ var PagedList = function (option) {
             self.error([]);
         }
 
-        function ProcessResponseData(data) {
-            var appendData = self.requestedPage() > self.currentPage();
+        function ProcessResponseData(response) {
+            var data = CreateEmptyObjectArray(response.details.totalEntries);
 
-            if (appendData) {
-                ko.utils.arrayPushAll(self.data(), data);
-                self.data.valueHasMutated();
-                // self.data.push.apply(self.data(), response);
+            // update items from existing data
+            data.updateItems(0, self.data());
 
-                // Increment page number after loading data so that the
-                // display will not be empty while waiting for the response
-                if (self.currentPage() < self.totalPages())
-                    self.currentPage(self.currentPage() + 1);
-            } else {
-                ExtractHeader(data[0]);
-                self.data(data);
-            }
+            // update items from response data
+            data.updateItems(GetRequestedPageStartIndex(), response.data);
+
+            // update ko data
+            self.data(data);
+
+            // extract columns
+            ExtractColumns(data[0]);
         }
 
         function ProcessResponseDetails(details) {
@@ -390,8 +401,9 @@ var PagedList = function (option) {
 
         // Used in determining whether column to be sort is valid
         // or existing in the columns array
-        function ExtractHeader(data) {
-            if (self.columns().length === 0) {
+        function ExtractColumns(data) {
+            if ((self.columns().length === 0 || self.queryOnFilterChangeOnly === false) &&
+                data !== undefined) {
                 var columns = $.map(data, function (v, i) { return i; });
                 self.columns(columns);
             }
@@ -413,6 +425,26 @@ var PagedList = function (option) {
             }
         }
 
+        function GetCurrentPageStartIndex() {
+            return (self.currentPage() - 1) * self.entriesPerPage();
+        }
+
+        function GetRequestedPageStartIndex() {
+            return (self.requestedPage() - 1) * self.entriesPerPage();
+        }
+
+        function CreateEmptyObjectArray(size) {
+            return Array.apply(null, Array(size)).map(function () { return {}; });
+        }
+
+        function NotEmptyItemsCount(array) {
+            return $.map(array, function (item, index) {
+                if (!$.isEmptyObject(item)) {
+                    return index;
+                }
+            }).length;
+        }
+
 
         /* INITIALIZATION */
 
@@ -430,4 +462,4 @@ var PagedList = function (option) {
         Init();
 
     };
-} ();
+}();
