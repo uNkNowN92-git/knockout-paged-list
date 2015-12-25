@@ -382,7 +382,9 @@ var PagedList = function (option) {
             var data = CreateEmptyObjectArray(response.details.totalEntries);
 
             // update items from existing data
-            data.updateItems(0, self.data());
+            var existingData = self.data();
+            existingData.splice(response.details.totalEntries, existingData.length - response.details.totalEntries); // trim excess
+            data.updateItems(0, existingData);
 
             // update items from response data
             if (self.sortOnly()) {
