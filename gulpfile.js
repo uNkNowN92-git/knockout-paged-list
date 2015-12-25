@@ -17,20 +17,18 @@ var banner = ['/*',
   ''].join('\n');
   
 var scripts = 'src/*.js';
-var filename = 'knockout-paged-list' + pkg.version;
-var buildDestination = 'build/' + pkg.version;
+var filename = 'knockout-paged-list';
+var buildDestination = 'dist';
 
 gulp.task('build', function () {
     return gulp.src(scripts)
         .pipe(header(banner, { pkg : pkg } ))
-        .pipe(rename({ extname: '-' + pkg.version + '.js' }))
+        .pipe(rename({ extname: '.js' }))
         .pipe(gulp.dest(buildDestination))
-        .pipe(gulp.dest(''))
         .pipe(rename({ extname: '.min.js' }))
         .pipe(uglify())
         .pipe(header(banner, { pkg : pkg } ))
         .pipe(gulp.dest(buildDestination))
-        .pipe(gulp.dest(''));
 });
 
 gulp.task('lint', function () {
