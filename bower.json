@@ -32,6 +32,11 @@
     "spec",
     "typings",
     "c#",
-    "lib"
+    "lib",
+    ".vscode",
+    "build",
+    "src",
+    "*.md",
+    "package.json"
   ]
 }
