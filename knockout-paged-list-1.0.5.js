@@ -1,7 +1,6 @@
-/**
- * knockout-paged-list - A KnockoutJS Plugin for Paged List/Grid
- * @version v1.0.5
- * @link https://github.com/uNkNowN92-git/knockout-paged-list/
+/*
+ * knockout-paged-list v1.0.5
+ * A KnockoutJS Plugin for Paged List/Grid
  * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
  * @license ISC
  */
@@ -65,7 +64,7 @@ var PagedList = function (option) {
 
         self.headers = ko.observableArray();
         self.error = ko.observableArray();
-        self.loading = ko.observable();
+        self.loading = ko.observable(false);
 
         /* Filtering observables */
 
@@ -99,15 +98,15 @@ var PagedList = function (option) {
         });
 
         self.previousEnabled = ko.computed(function () {
-            return self.currentPage() !== 1;
+            return self.currentPage() !== 1 && self.loading() === false;
         });
 
         self.nextEnabled = ko.computed(function () {
-            return self.currentPage() !== self.totalPages();
+            return self.currentPage() !== self.totalPages() && self.loading() === false;
         });
 
         self.showFirstEntriesEnabled = ko.computed(function () {
-            return self.hasEntries() && self.totalEntries() > self.defaultEntriesPerPage;
+            return self.hasEntries() && self.totalEntries() > self.defaultEntriesPerPage && self.loading() === false;
         });
 
         self.firstEntriesCount = ko.computed(function () {
