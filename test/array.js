@@ -40,15 +40,19 @@ var response = {
 // console.log("updated data: ", data);
 
 
+// function CreateEmptyObjectArray(size) {
+//     return Array.apply(null, Array(size)).map(function () { return {}; });
+// }
+
 function CreateEmptyObjectArray(size) {
-    return Array.apply(null, Array(size)).map(function () { return {}; });
+    return $.map(Array.apply(null, Array(size)), function () { return {}; });
 }
 
 var data = CreateEmptyObjectArray(response.details.totalEntries);
 
-console.log(data[7]);
+console.log(data);
 
-// data.updateItems(response.details.start, response.data);
+data.updateItems(response.details.start, response.data);
 
 // console.log("updated data: ", data);
 console.log(data[7]);
