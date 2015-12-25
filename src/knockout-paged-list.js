@@ -5,14 +5,11 @@ var PagedList = function (option) {
 
         /* PROTOTYPES */
 
-        Object.defineProperty(Array.prototype, "updateItems", {
-            enumerable: false,
-            value: function (index, newItems) {
+        Array.prototype.updateItems = function (index, newItems) {
                 if (newItems === undefined) return;
 
                 Array.prototype.splice.apply(this, [index, newItems.length].concat(newItems));
-            }
-        });
+        };
 
 
         /* VARIABLES */
