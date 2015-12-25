@@ -523,6 +523,15 @@ options.clearLoadedDataOnError
 self.queryOnFilterChangeOnly
 ```
 
+##Server-related Variables
+```javascript
+/* Server-related variables */
+
+// contains the ajax request
+self.request
+```
+
+
 ##Paging Observables
 ```javascript
 /* Paging observables */
