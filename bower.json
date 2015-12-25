@@ -35,8 +35,6 @@
     "lib",
     ".vscode",
     "build",
-    "src",
-    "*.md",
     "package.json"
   ]
 }
