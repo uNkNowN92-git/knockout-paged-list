@@ -10,11 +10,6 @@ This plugin uses **KnockoutJS** to create a [paged/paginated list/grid](#display
 > [KnockoutJS](http://knockoutjs.com/)  
  [jQuery](https://jquery.com/)
 
-#Todo
-* Write test scripts
-* Create a demo page
-* Include ASP.NET Web API integration snippets
-
 
 #Usage
 
@@ -236,7 +231,7 @@ public static class HtmlHelpers
 ```
 
 ###HTML Helper Usage in Razor
-```razor
+```csharp
 @using HtmlHelpers
 @model MyDataModel
 
