@@ -194,7 +194,7 @@ public static class PagedListExtension
         // get the entries of the specified page
         var pagedList = data
             .Skip(pagedListOptions.Start)
-            .Take(pagedListOptions.Entries);
+            .Take(pagedListOptions.ShowAll ? data.Count() : pagedListOptions.Entries);
 
         // get details of the data
         var details = new PagedListDetails()
