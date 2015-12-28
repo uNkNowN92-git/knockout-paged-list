@@ -179,11 +179,11 @@ public class MyDataModel
 }
 ```
 
-###Sample Extension to convert the IQueryable data to PagedListResult
+###Sample Extension to convert the IEnumerable data to PagedListResult
 ```csharp
 public static class PagedListExtension
 {
-    public static PagedListResult<T> ToPagedListResult<T>(this IQueryable<T> data, PagedListOptions pagedListOptions)
+    public static PagedListResult<T> ToPagedListResult<T>(this IEnumerable<T> data, PagedListOptions pagedListOptions)
     {
         // sort the data
         if (!string.IsNullOrEmpty(pagedListOptions.OrderBy))
