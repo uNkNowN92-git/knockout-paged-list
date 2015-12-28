@@ -208,6 +208,41 @@ public static class PagedListExtension
 }
 ```
 
+###Sample Extension to get the JsonPropertyName
+```csharp
+using System;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Web.Mvc;
+using System.Reflection;
+using Newtonsoft.Json;
+
+...
+public static class HtmlHelpers
+{
+    public static string GetJsonPropertyName<TModel, TValue>(this HtmlHelper<TModel> helper, Expression<Func<TModel, TValue>> expression)
+    {
+        var data = ModelMetadata.FromLambdaExpression(expression, helper.ViewData);
+    
+        var jsonPropertyName = typeof(TModel).GetProperty(data.PropertyName)
+                .GetCustomAttributes(typeof(JsonPropertyAttribute))
+                .Cast<JsonPropertyAttribute>()
+                .Select(p => p.PropertyName)
+                .FirstOrDefault();
+    
+        return jsonPropertyName;
+    }
+}
+```
+
+###HTML Helper Usage in Razor
+```razor
+@using HtmlHelpers
+@model MyDataModel
+
+<td data-bind="text: @Html.GetJsonPropertyName(x => x.ColumnName)"></td>
+```
+
 ##Client-side
 Include scripts in page:
 ```html
