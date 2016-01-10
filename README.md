@@ -566,17 +566,11 @@ self.request
 ```javascript
 /* Paging observables */
 
-// holds the URL to request data from 
-self.url()
-
 // array of data currently loaded
 self.data()
 
 // current page displayed
 self.currentPage()
-
-// page to be navigated/displayed
-self.requestedPage()
 
 // entries to display per page
 self.entriesPerPage()

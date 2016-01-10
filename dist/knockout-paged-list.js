@@ -1,5 +1,5 @@
 /*
- * knockout-paged-list v1.1.1
+ * knockout-paged-list v1.1.2
  * A KnockoutJS Plugin for Paged List/Grid
  * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
  * @license ISC
@@ -20,17 +20,31 @@ var PagedList = function (option) {
 
         /* VARIABLES */
 
+        /* Mapping variables */
+
+        var _mapping = {
+            create: function (options) {
+                return options.data;
+            }
+        };
+
+        var _dataPropertyCount = 0;
+
         /* Data variables */
 
-        self.currentData = [];
+        var _currentData = [];
+
+        /* Paging variables */
+
+        var _url;
 
         /* Settings/Options variables */
 
-        self.defaultUrl = undefined;
-        self.queryOnLoad = true;
-        self.defaultEntriesPerPage = 5;
-        self.clearLoadedDataOnError = false;
-        self.queryOnFilterChangeOnly = true;
+        var _defaultUrl;
+        var _queryOnLoad = true;
+        var _defaultEntriesPerPage = 5;
+        var _clearLoadedDataOnError = false;
+        var _queryOnFilterChangeOnly = true;
 
         /* Server-related variables */
 
@@ -46,11 +60,10 @@ var PagedList = function (option) {
 
         /* Paging observables */
 
-        self.url = ko.observable();
         self.data = ko.observableArray([]);
         self.currentPage = ko.observable(1);
         self.requestedPage = ko.observable(1);
-        self.entriesPerPage = ko.observable(self.defaultEntriesPerPage);
+        self.entriesPerPage = ko.observable(_defaultEntriesPerPage);
         self.requestedEntriesPerPage = ko.observable(1);
         self.totalEntries = ko.observable(0);
 
@@ -100,21 +113,21 @@ var PagedList = function (option) {
         });
 
         self.showFirstEntriesEnabled = ko.pureComputed(function () {
-            return self.hasEntries() && self.totalEntries() > self.defaultEntriesPerPage && self.loading() === false;
+            return self.hasEntries() && self.totalEntries() > _defaultEntriesPerPage && self.loading() === false;
         });
 
         self.firstEntriesCount = ko.pureComputed(function () {
-            return self.totalEntries() < self.entriesPerPage() ? self.totalEntries() : self.defaultEntriesPerPage;
+            return self.totalEntries() < self.entriesPerPage() ? self.totalEntries() : _defaultEntriesPerPage;
         });
 
         self.previousItemsCount = ko.pureComputed(function () {
-            return self.defaultEntriesPerPage;
+            return _defaultEntriesPerPage;
         });
 
         self.nextItemsCount = ko.pureComputed(function () {
             return self.totalPages() - self.currentPage() == 1 ?
                 self.totalEntries() - (self.entriesPerPage() * (self.totalPages() - 1)) :
-                self.defaultEntriesPerPage;
+                _defaultEntriesPerPage;
         });
 
         self.loadedEntriesCount = ko.pureComputed(function () {
@@ -150,17 +163,7 @@ var PagedList = function (option) {
 
 
         /* FUNCTIONS */
-        
-        /* Mapping functions */
-        
-        self.mapData = function () {
-            // make all data observable
-            var mappedData = ko.mapping.fromJS(self.currentData);
 
-            // update data from mappedData observable
-            self.data(mappedData);
-        };
-        
         /* Paging functions */
 
         self.firstPage = function () {
@@ -191,7 +194,7 @@ var PagedList = function (option) {
 
         self.showFirstEntries = function () {
             self.requestedPage(1);
-            self.requestedEntriesPerPage(self.defaultEntriesPerPage);
+            self.requestedEntriesPerPage(_defaultEntriesPerPage);
 
             UpdateDisplayedEntries();
         };
@@ -236,7 +239,7 @@ var PagedList = function (option) {
         /* Server-related functions */
 
         self.setUrl = function (url) {
-            self.url(url !== undefined ? url : self.defaultUrl);
+            _url = url !== undefined ? url : _defaultUrl;
         };
 
         self.getList = function (data, event) {
@@ -251,6 +254,40 @@ var PagedList = function (option) {
 
         /* METHODS */
 
+        /* Mapping methods */
+
+        function MapData() {
+            // make all data observable
+            var mappedData = ko.mapping.fromJS(_currentData, _mapping);
+
+            // update data from mappedData observable
+            self.data(mappedData);
+        }
+
+        function isEmptyObject(obj) {
+            var property = [],
+                name;
+
+            for (name in obj) {
+                property.push(name);
+
+                if (property.length > _dataPropertyCount)
+                    return false;
+            }
+            return true;
+        }
+
+        function GetPropertiesCount(obj) {
+            var property = [],
+                name;
+
+            for (name in obj) {
+                property.push(name);
+            }
+
+            return property.length;
+        }
+
         /* Paging methods */
 
         function ShowAll() {
@@ -262,10 +299,10 @@ var PagedList = function (option) {
             if (FiltersHasChanged()) {
                 // Request fresh data
                 self.requestedPage(1);
-                self.requestedEntriesPerPage(self.defaultEntriesPerPage);
+                self.requestedEntriesPerPage(_defaultEntriesPerPage);
                 ExecuteQuery();
 
-            } else if (self.queryOnFilterChangeOnly === false) {
+            } else if (_queryOnFilterChangeOnly === false) {
                 // Request on filter change only
                 ExecuteQuery();
 
@@ -322,7 +359,7 @@ var PagedList = function (option) {
         }
 
         function ExecuteQuery() {
-            if (self.url() !== undefined) {
+            if (_url !== undefined) {
                 CancelPreviousRequest();
                 self.loading(true);
                 self.error([]);
@@ -330,7 +367,7 @@ var PagedList = function (option) {
                 var queryOptions = BuildQueryOptions();
 
                 self.request = $.ajax({
-                    url: self.url(),
+                    url: _url,
                     method: 'get',
                     dataType: 'json',
                     data: queryOptions,
@@ -401,7 +438,7 @@ var PagedList = function (option) {
 
             if (typeof (existingData) === "function") {
                 // trim excess
-                existingData.splice(response.details.totalEntries, existingData.length - response.details.totalEntries);
+                existingData.splice(response.details.totalEntries, existingData().length - response.details.totalEntries);
 
                 // update items from existing data
                 data.updateItems(0, existingData());
@@ -419,16 +456,16 @@ var PagedList = function (option) {
             ExtractColumns(data[0]);
 
             // store to global variable currentData
-            self.currentData = data;
+            _currentData = data;
 
             // map current data to observble data
-            self.mapData();
+            MapData();
         }
 
         // Used in determining whether column to be sort is valid
         // or existing in the columns array
         function ExtractColumns(data) {
-            if (self.columns().length === 0 || self.queryOnFilterChangeOnly === false) {
+            if (self.columns().length === 0 || _queryOnFilterChangeOnly === false) {
                 var columns = $.map(data, function (v, i) { return i; });
                 self.columns(columns);
             }
@@ -451,7 +488,7 @@ var PagedList = function (option) {
             // Clear applied filters
             self.appliedFilter([]);
 
-            if (self.clearLoadedDataOnError) {
+            if (_clearLoadedDataOnError) {
                 // Clear previous laoded data
                 self.data([]);
             }
@@ -471,10 +508,16 @@ var PagedList = function (option) {
 
         function NotEmptyItemsCount(array) {
             return $.map(array, function (item, index) {
-                if (!$.isEmptyObject(item)) {
+                if (!isEmptyObject(item)) {
                     return index;
                 }
             }).length;
+        }
+
+        /* Helpers */
+
+        function ValueOrDefault(value, defaultValue) {
+            return value !== undefined ? value : defaultValue;
         }
 
         /* Initialization */
@@ -482,21 +525,24 @@ var PagedList = function (option) {
         function ConfigureOptions() {
 
             if (option) {
-                self.defaultUrl = option.url !== undefined ? option.url : self.defaultUrl;
-                self.queryOnLoad = option.queryOnLoad !== undefined ? option.queryOnLoad : self.queryOnLoad;
-                self.defaultEntriesPerPage = option.entriesPerPage !== undefined ? option.entriesPerPage : self.defaultEntriesPerPage;
-                self.clearLoadedDataOnError = option.clearLoadedDataOnError !== undefined ? option.clearLoadedDataOnError : self.clearLoadedDataOnError;
-                self.queryOnFilterChangeOnly = option.queryOnFilterChangeOnly !== undefined ? option.queryOnFilterChangeOnly : self.queryOnFilterChangeOnly;
+                _defaultUrl = ValueOrDefault(option.url, _defaultUrl);
+                _queryOnLoad = ValueOrDefault(option.queryOnLoad, _queryOnLoad);
+                _defaultEntriesPerPage = ValueOrDefault(option.entriesPerPage, _defaultEntriesPerPage);
+                _clearLoadedDataOnError = ValueOrDefault(option.clearLoadedDataOnError, _clearLoadedDataOnError);
+                _queryOnFilterChangeOnly = ValueOrDefault(option.queryOnFilterChangeOnly, _queryOnFilterChangeOnly);
+                _mapping = ValueOrDefault(option.mapping, _mapping);
+
+                _dataPropertyCount = GetPropertiesCount(_mapping.create({ data: {} }));
             }
         }
 
         function Init() {
 
-            if (self.defaultUrl !== undefined) {
-                self.setUrl(self.defaultUrl);
+            if (_defaultUrl !== undefined) {
+                self.setUrl(_defaultUrl);
 
                 // Load initial data
-                if (self.queryOnLoad)
+                if (_queryOnLoad)
                     self.getList();
             }
         }
