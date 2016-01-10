@@ -240,7 +240,7 @@ var ViewModel = function (options) {
     self.selectedItem = ko.observable();
     
     // Sample logic to enable submit button
-    self.validInput = ko.computed(function () {
+    self.validInput = ko.pureComputed(function () {
         return self.selectedItem() !== null;
     });
 }
