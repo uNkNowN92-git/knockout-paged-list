@@ -20,7 +20,7 @@ var scripts = 'src/*.js';
 var filename = 'knockout-paged-list';
 var buildDestination = 'dist';
 
-gulp.task('build', function () {
+gulp.task('build-js', function () {
     return gulp.src(scripts)
         .pipe(header(banner, { pkg : pkg } ))
         .pipe(rename({ extname: '.js' }))
@@ -42,3 +42,4 @@ gulp.task('watch', function () {
 });
 
 gulp.task('default', ['lint', 'watch']);
+gulp.task('build', ['lint', 'build-js']);

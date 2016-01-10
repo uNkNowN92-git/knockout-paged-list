@@ -686,6 +686,14 @@ self.parserError()
 
 #Functions
 
+##Mapping Functions
+```javascript
+/* Mapping functions */
+
+// Map current data to observable array (data)
+self.mapData()
+```
+
 ##Paging Functions
 ```javascript
 /* Paging functions */

@@ -1,5 +1,5 @@
 /*
- * knockout-paged-list v1.1.0
+ * knockout-paged-list v1.1.1
  * A KnockoutJS Plugin for Paged List/Grid
  * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
  * @license ISC
@@ -20,6 +20,10 @@ var PagedList = function (option) {
 
         /* VARIABLES */
 
+        /* Data variables */
+
+        self.currentData = [];
+
         /* Settings/Options variables */
 
         self.defaultUrl = undefined;
@@ -34,17 +38,6 @@ var PagedList = function (option) {
 
 
         /* CONFIGURE OPTIONS */
-
-        function ConfigureOptions() {
-
-            if (option) {
-                self.defaultUrl = option.url !== undefined ? option.url : self.defaultUrl;
-                self.queryOnLoad = option.queryOnLoad !== undefined ? option.queryOnLoad : self.queryOnLoad;
-                self.defaultEntriesPerPage = option.entriesPerPage !== undefined ? option.entriesPerPage : self.defaultEntriesPerPage;
-                self.clearLoadedDataOnError = option.clearLoadedDataOnError !== undefined ? option.clearLoadedDataOnError : self.clearLoadedDataOnError;
-                self.queryOnFilterChangeOnly = option.queryOnFilterChangeOnly !== undefined ? option.queryOnFilterChangeOnly : self.queryOnFilterChangeOnly;
-            }
-        }
 
         ConfigureOptions();
 
@@ -126,7 +119,7 @@ var PagedList = function (option) {
 
         self.loadedEntriesCount = ko.pureComputed(function () {
             var data = self.data();
-        
+
             if (typeof (data) === "function") {
                 return NotEmptyItemsCount(data());
             }
@@ -155,8 +148,19 @@ var PagedList = function (option) {
             return self.error().status !== undefined ? self.error().status === "parsererror" : false;
         });
 
-        /* FUNCTIONS */
 
+        /* FUNCTIONS */
+        
+        /* Mapping functions */
+        
+        self.mapData = function () {
+            // make all data observable
+            var mappedData = ko.mapping.fromJS(self.currentData);
+
+            // update data from mappedData observable
+            self.data(mappedData);
+        };
+        
         /* Paging functions */
 
         self.firstPage = function () {
@@ -242,6 +246,8 @@ var PagedList = function (option) {
             UpdateDisplayedEntries();
         };
 
+
+        /* *** PRIVATE *** */
 
         /* METHODS */
 
@@ -409,13 +415,14 @@ var PagedList = function (option) {
                 data.updateItems(GetRequestedPageStartIndex(), response.data);
             }
 
-            // make all data observable
-            var mappedData = ko.mapping.fromJS(data);
-            // update data from mappedData observable
-            self.data(mappedData);
-        
             // extract columns
             ExtractColumns(data[0]);
+
+            // store to global variable currentData
+            self.currentData = data;
+
+            // map current data to observble data
+            self.mapData();
         }
 
         // Used in determining whether column to be sort is valid
@@ -470,8 +477,18 @@ var PagedList = function (option) {
             }).length;
         }
 
+        /* Initialization */
 
-        /* INITIALIZATION */
+        function ConfigureOptions() {
+
+            if (option) {
+                self.defaultUrl = option.url !== undefined ? option.url : self.defaultUrl;
+                self.queryOnLoad = option.queryOnLoad !== undefined ? option.queryOnLoad : self.queryOnLoad;
+                self.defaultEntriesPerPage = option.entriesPerPage !== undefined ? option.entriesPerPage : self.defaultEntriesPerPage;
+                self.clearLoadedDataOnError = option.clearLoadedDataOnError !== undefined ? option.clearLoadedDataOnError : self.clearLoadedDataOnError;
+                self.queryOnFilterChangeOnly = option.queryOnFilterChangeOnly !== undefined ? option.queryOnFilterChangeOnly : self.queryOnFilterChangeOnly;
+            }
+        }
 
         function Init() {
 
