@@ -10,11 +10,6 @@ This plugin uses **KnockoutJS** to create a [paged/paginated list/grid](#display
 > [KnockoutJS](http://knockoutjs.com/)  
  [jQuery](https://jquery.com/)
 
-#Todo
-* Write test scripts
-* Create a demo page
-* Include ASP.NET Web API integration snippets
-
 
 #Usage
 
@@ -179,11 +174,11 @@ public class MyDataModel
 }
 ```
 
-###Sample Extension to convert the IQueryable data to PagedListResult
+###Sample Extension to convert the IEnumerable data to PagedListResult
 ```csharp
 public static class PagedListExtension
 {
-    public static PagedListResult<T> ToPagedListResult<T>(this IQueryable<T> data, PagedListOptions pagedListOptions)
+    public static PagedListResult<T> ToPagedListResult<T>(this IEnumerable<T> data, PagedListOptions pagedListOptions)
     {
         // sort the data
         if (!string.IsNullOrEmpty(pagedListOptions.OrderBy))
@@ -194,7 +189,7 @@ public static class PagedListExtension
         // get the entries of the specified page
         var pagedList = data
             .Skip(pagedListOptions.Start)
-            .Take(pagedListOptions.Entries);
+            .Take(pagedListOptions.ShowAll ? data.Count() : pagedListOptions.Entries);
 
         // get details of the data
         var details = new PagedListDetails()
@@ -206,6 +201,41 @@ public static class PagedListExtension
         return new PagedListResult<T>(pagedList, details);
     }
 }
+```
+
+###Sample Extension to get the JsonPropertyName
+```csharp
+using System;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Web.Mvc;
+using System.Reflection;
+using Newtonsoft.Json;
+
+...
+public static class HtmlHelpers
+{
+    public static string GetJsonPropertyName<TModel, TValue>(this HtmlHelper<TModel> helper, Expression<Func<TModel, TValue>> expression)
+    {
+        var data = ModelMetadata.FromLambdaExpression(expression, helper.ViewData);
+    
+        var jsonPropertyName = typeof(TModel).GetProperty(data.PropertyName)
+                .GetCustomAttributes(typeof(JsonPropertyAttribute))
+                .Cast<JsonPropertyAttribute>()
+                .Select(p => p.PropertyName)
+                .FirstOrDefault();
+    
+        return jsonPropertyName;
+    }
+}
+```
+
+###HTML Helper Usage in Razor
+```csharp
+@using HtmlHelpers
+@model MyDataModel
+
+<td data-bind="text: @Html.GetJsonPropertyName(x => x.ColumnName)"></td>
 ```
 
 ##Client-side
