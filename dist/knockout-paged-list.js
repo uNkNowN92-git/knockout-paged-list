@@ -1,5 +1,5 @@
 /*
- * knockout-paged-list v1.0.5
+ * knockout-paged-list v1.1.0
  * A KnockoutJS Plugin for Paged List/Grid
  * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
  * @license ISC
@@ -54,10 +54,11 @@ var PagedList = function (option) {
         /* Paging observables */
 
         self.url = ko.observable();
-        self.data = ko.observableArray();
+        self.data = ko.observableArray([]);
         self.currentPage = ko.observable(1);
         self.requestedPage = ko.observable(1);
         self.entriesPerPage = ko.observable(self.defaultEntriesPerPage);
+        self.requestedEntriesPerPage = ko.observable(1);
         self.totalEntries = ko.observable(0);
 
         /* Server-related observables */
@@ -83,69 +84,74 @@ var PagedList = function (option) {
         /* Paging helpers */
 
         // Entries to display
-        self.entries = ko.computed(function () {
+        self.entries = ko.pureComputed(function () {
             var first = GetCurrentPageStartIndex();
             return self.data.slice(first, first + self.entriesPerPage());
         });
 
-        self.hasEntries = ko.computed(function () {
+        self.hasEntries = ko.pureComputed(function () {
             return self.totalEntries() > 0;
         });
 
-        self.totalPages = ko.computed(function () {
+        self.totalPages = ko.pureComputed(function () {
             var pages = Math.ceil(self.totalEntries() / self.entriesPerPage());
             return pages > 0 ? pages : 1;
         });
 
-        self.previousEnabled = ko.computed(function () {
+        self.previousEnabled = ko.pureComputed(function () {
             return self.currentPage() !== 1 && self.loading() === false;
         });
 
-        self.nextEnabled = ko.computed(function () {
+        self.nextEnabled = ko.pureComputed(function () {
             return self.currentPage() !== self.totalPages() && self.loading() === false;
         });
 
-        self.showFirstEntriesEnabled = ko.computed(function () {
+        self.showFirstEntriesEnabled = ko.pureComputed(function () {
             return self.hasEntries() && self.totalEntries() > self.defaultEntriesPerPage && self.loading() === false;
         });
 
-        self.firstEntriesCount = ko.computed(function () {
+        self.firstEntriesCount = ko.pureComputed(function () {
             return self.totalEntries() < self.entriesPerPage() ? self.totalEntries() : self.defaultEntriesPerPage;
         });
 
-        self.previousItemsCount = ko.computed(function () {
+        self.previousItemsCount = ko.pureComputed(function () {
             return self.defaultEntriesPerPage;
         });
 
-        self.nextItemsCount = ko.computed(function () {
+        self.nextItemsCount = ko.pureComputed(function () {
             return self.totalPages() - self.currentPage() == 1 ?
                 self.totalEntries() - (self.entriesPerPage() * (self.totalPages() - 1)) :
                 self.defaultEntriesPerPage;
         });
 
-        self.loadedEntriesCount = ko.computed(function () {
-            return NotEmptyItemsCount(self.data());
+        self.loadedEntriesCount = ko.pureComputed(function () {
+            var data = self.data();
+        
+            if (typeof (data) === "function") {
+                return NotEmptyItemsCount(data());
+            }
+            return 0;
         });
 
-        self.shownAll = ko.computed(function () {
+        self.shownAll = ko.pureComputed(function () {
             return self.entriesPerPage() >= self.totalEntries();
         });
 
         self.totalEntriesOnNextPage = function () {
-            return self.requestedPage() * self.entriesPerPage();
+            return self.requestedPage() * self.requestedEntriesPerPage();
         };
 
         /* Server-related helpers */
 
-        self.hasError = ko.computed(function () {
+        self.hasError = ko.pureComputed(function () {
             return self.error().length !== 0;
         });
 
-        self.errorCode = ko.computed(function () {
+        self.errorCode = ko.pureComputed(function () {
             return self.error().jqXHR !== undefined ? self.error().jqXHR.status : null;
         });
 
-        self.parserError = ko.computed(function () {
+        self.parserError = ko.pureComputed(function () {
             return self.error().status !== undefined ? self.error().status === "parsererror" : false;
         });
 
@@ -181,14 +187,14 @@ var PagedList = function (option) {
 
         self.showFirstEntries = function () {
             self.requestedPage(1);
-            self.entriesPerPage(self.defaultEntriesPerPage);
+            self.requestedEntriesPerPage(self.defaultEntriesPerPage);
 
             UpdateDisplayedEntries();
         };
 
         self.showAll = function () {
             self.requestedPage(1);
-            self.entriesPerPage(self.totalEntries());
+            self.requestedEntriesPerPage(self.totalEntries());
 
             UpdateDisplayedEntries();
         };
@@ -250,7 +256,7 @@ var PagedList = function (option) {
             if (FiltersHasChanged()) {
                 // Request fresh data
                 self.requestedPage(1);
-                self.entriesPerPage(self.defaultEntriesPerPage);
+                self.requestedEntriesPerPage(self.defaultEntriesPerPage);
                 ExecuteQuery();
 
             } else if (self.queryOnFilterChangeOnly === false) {
@@ -268,6 +274,7 @@ var PagedList = function (option) {
             } else {
                 // Update paging only
                 self.currentPage(self.requestedPage());
+                self.entriesPerPage(self.requestedEntriesPerPage());
 
             }
         }
@@ -287,8 +294,9 @@ var PagedList = function (option) {
         }
 
         function UpdateNeeded() {
-            return self.loadedEntriesCount() < self.totalEntriesOnNextPage() &&
-                self.loadedEntriesCount() != self.totalEntries();
+            return (self.loadedEntriesCount() < self.totalEntriesOnNextPage() ||
+                self.entriesPerPage() !== self.requestedEntriesPerPage()) &&
+                self.loadedEntriesCount() !== self.totalEntries();
         }
 
 
@@ -325,6 +333,7 @@ var PagedList = function (option) {
                     beforeSend: SetHeader
                 }).always(function () {
                     self.loading(false);
+                    self.entriesPerPage(self.requestedEntriesPerPage());
                 });
             }
         }
@@ -345,7 +354,7 @@ var PagedList = function (option) {
             // Paging options
             var queryOptions = {
                 page: self.requestedPage(),
-                perPage: self.entriesPerPage(),
+                perPage: self.requestedEntriesPerPage(),
                 currentEntries: self.loadedEntriesCount(),
                 showAll: ShowAll()
             };
@@ -381,10 +390,16 @@ var PagedList = function (option) {
         function ProcessResponseData(response) {
             var data = CreateEmptyObjectArray(response.details.totalEntries);
 
-            // update items from existing data
+            // retrieve existing data
             var existingData = self.data();
-            existingData.splice(response.details.totalEntries, existingData.length - response.details.totalEntries); // trim excess
-            data.updateItems(0, existingData);
+
+            if (typeof (existingData) === "function") {
+                // trim excess
+                existingData.splice(response.details.totalEntries, existingData.length - response.details.totalEntries);
+
+                // update items from existing data
+                data.updateItems(0, existingData());
+            }
 
             // update items from response data
             if (self.sortOnly()) {
@@ -394,9 +409,11 @@ var PagedList = function (option) {
                 data.updateItems(GetRequestedPageStartIndex(), response.data);
             }
 
-            // update ko data
-            self.data(data);
-
+            // make all data observable
+            var mappedData = ko.mapping.fromJS(data);
+            // update data from mappedData observable
+            self.data(mappedData);
+        
             // extract columns
             ExtractColumns(data[0]);
         }
