@@ -1,4 +1,4 @@
-var PagedList = function (option) {
+var PagedList = (function () {
     return function (option) {
         var self = this;
 
@@ -548,4 +548,4 @@ var PagedList = function (option) {
         Init();
 
     };
-}();
+})();

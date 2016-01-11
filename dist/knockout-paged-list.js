@@ -4,7 +4,7 @@
  * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
  * @license ISC
  */
-var PagedList = function (option) {
+var PagedList = (function () {
     return function (option) {
         var self = this;
 
@@ -554,4 +554,4 @@ var PagedList = function (option) {
         Init();
 
     };
-}();
+})();
