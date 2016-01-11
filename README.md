@@ -335,17 +335,19 @@ Sample bindings to display the paginated data in a table:
 Use the built-in paging bindings in buttons to **navigate** through the list and display **entry count**:
 ```html
 <div class="pager">
-    <button class="btn" data-bind="click: showAll, visible: !shownAll()">
+    <button class="btn" data-bind="click: showAll, enable: showAllEntriesEnabled, visible: !shownAll()">
         Show all <span data-bind="text: totalEntries"></span> available entries
     </button>
     <button class="btn" data-bind="click: showFirstEntries, enable: showFirstEntriesEnabled, visible: shownAll">
         Show first <span data-bind="text: firstEntriesCount"></span> available entries
     </button>
     <button class="btn" data-bind="click: previous, enable: previousEnabled">
+        <span class="previous glyphicon glyphicon-chevron-left"></span>
         Previous <span data-bind="text: previousItemsCount"></span> results
     </button>
     <button class="btn" data-bind="click: next, enable: nextEnabled">
         Next <span data-bind="text: nextItemsCount"></span> results
+        <span class="next glyphicon glyphicon-chevron-right"></span>
     </button>
 </div>
 
