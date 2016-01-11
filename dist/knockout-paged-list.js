@@ -1,5 +1,5 @@
 /*
- * knockout-paged-list v1.1.2
+ * knockout-paged-list v1.1.3
  * A KnockoutJS Plugin for Paged List/Grid
  * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
  * @license ISC
@@ -37,6 +37,8 @@ var PagedList = function (option) {
         /* Paging variables */
 
         var _url;
+        var _requestedPage = ko.observable(1);
+        var _requestedEntriesPerPage = ko.observable(1);
 
         /* Settings/Options variables */
 
@@ -62,9 +64,7 @@ var PagedList = function (option) {
 
         self.data = ko.observableArray([]);
         self.currentPage = ko.observable(1);
-        self.requestedPage = ko.observable(1);
         self.entriesPerPage = ko.observable(_defaultEntriesPerPage);
-        self.requestedEntriesPerPage = ko.observable(1);
         self.totalEntries = ko.observable(0);
 
         /* Server-related observables */
@@ -112,6 +112,10 @@ var PagedList = function (option) {
             return self.currentPage() !== self.totalPages() && self.loading() === false;
         });
 
+        self.showAllEntriesEnabled = ko.pureComputed(function () {
+            return self.totalEntries() > _defaultEntriesPerPage && self.loading() === false;
+        });
+
         self.showFirstEntriesEnabled = ko.pureComputed(function () {
             return self.hasEntries() && self.totalEntries() > _defaultEntriesPerPage && self.loading() === false;
         });
@@ -140,11 +144,11 @@ var PagedList = function (option) {
         });
 
         self.shownAll = ko.pureComputed(function () {
-            return self.entriesPerPage() >= self.totalEntries();
+            return self.totalEntries() <= _defaultEntriesPerPage ? false : self.entriesPerPage() >= self.totalEntries();
         });
 
         self.totalEntriesOnNextPage = function () {
-            return self.requestedPage() * self.requestedEntriesPerPage();
+            return _requestedPage() * _requestedEntriesPerPage();
         };
 
         /* Server-related helpers */
@@ -167,7 +171,7 @@ var PagedList = function (option) {
         /* Paging functions */
 
         self.firstPage = function () {
-            self.requestedPage(1);
+            _requestedPage(1);
             UpdateDisplayedEntries();
         };
 
@@ -178,7 +182,7 @@ var PagedList = function (option) {
 
         self.next = function () {
             if (self.currentPage() < self.totalPages()) {
-                self.requestedPage(self.currentPage() + 1);
+                _requestedPage(self.currentPage() + 1);
 
                 UpdateDisplayedEntries();
             }
@@ -186,22 +190,22 @@ var PagedList = function (option) {
 
         self.previous = function () {
             if (self.currentPage() > 1) {
-                self.requestedPage(self.currentPage() - 1);
+                _requestedPage(self.currentPage() - 1);
 
                 UpdateDisplayedEntries();
             }
         };
 
         self.showFirstEntries = function () {
-            self.requestedPage(1);
-            self.requestedEntriesPerPage(_defaultEntriesPerPage);
+            _requestedPage(1);
+            _requestedEntriesPerPage(_defaultEntriesPerPage);
 
             UpdateDisplayedEntries();
         };
 
         self.showAll = function () {
-            self.requestedPage(1);
-            self.requestedEntriesPerPage(self.totalEntries());
+            _requestedPage(1);
+            _requestedEntriesPerPage(self.totalEntries());
 
             UpdateDisplayedEntries();
         };
@@ -243,7 +247,7 @@ var PagedList = function (option) {
         };
 
         self.getList = function (data, event) {
-            self.requestedPage(1);
+            _requestedPage(1);
             GetDataUrl(event);
 
             UpdateDisplayedEntries();
@@ -291,15 +295,15 @@ var PagedList = function (option) {
         /* Paging methods */
 
         function ShowAll() {
-            return self.requestedPage() === 1 && self.entriesPerPage() === self.totalEntries();
+            return _requestedPage() === 1 && self.entriesPerPage() === self.totalEntries();
         }
 
         function UpdateDisplayedEntries() {
             // Order by priority
             if (FiltersHasChanged()) {
                 // Request fresh data
-                self.requestedPage(1);
-                self.requestedEntriesPerPage(_defaultEntriesPerPage);
+                _requestedPage(1);
+                _requestedEntriesPerPage(_defaultEntriesPerPage);
                 ExecuteQuery();
 
             } else if (_queryOnFilterChangeOnly === false) {
@@ -316,8 +320,8 @@ var PagedList = function (option) {
 
             } else {
                 // Update paging only
-                self.currentPage(self.requestedPage());
-                self.entriesPerPage(self.requestedEntriesPerPage());
+                self.currentPage(_requestedPage());
+                self.entriesPerPage(_requestedEntriesPerPage());
 
             }
         }
@@ -338,7 +342,7 @@ var PagedList = function (option) {
 
         function UpdateNeeded() {
             return (self.loadedEntriesCount() < self.totalEntriesOnNextPage() ||
-                self.entriesPerPage() !== self.requestedEntriesPerPage()) &&
+                self.entriesPerPage() !== _requestedEntriesPerPage()) &&
                 self.loadedEntriesCount() !== self.totalEntries();
         }
 
@@ -376,7 +380,7 @@ var PagedList = function (option) {
                     beforeSend: SetHeader
                 }).always(function () {
                     self.loading(false);
-                    self.entriesPerPage(self.requestedEntriesPerPage());
+                    self.entriesPerPage(_requestedEntriesPerPage());
                 });
             }
         }
@@ -396,8 +400,8 @@ var PagedList = function (option) {
         function BuildQueryOptions() {
             // Paging options
             var queryOptions = {
-                page: self.requestedPage(),
-                perPage: self.requestedEntriesPerPage(),
+                page: _requestedPage(),
+                perPage: _requestedEntriesPerPage(),
                 currentEntries: self.loadedEntriesCount(),
                 showAll: ShowAll()
             };
@@ -423,7 +427,7 @@ var PagedList = function (option) {
                 ProcessResponseData(response);
 
                 // Update current page to requested page
-                self.currentPage(self.requestedPage());
+                self.currentPage(_requestedPage());
             }
 
             ProcessResponseDetails(response.details);
@@ -499,7 +503,7 @@ var PagedList = function (option) {
         }
 
         function GetRequestedPageStartIndex() {
-            return (self.requestedPage() - 1) * self.entriesPerPage();
+            return (_requestedPage() - 1) * self.entriesPerPage();
         }
 
         function CreateEmptyObjectArray(size) {

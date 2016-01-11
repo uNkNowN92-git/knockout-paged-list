@@ -106,6 +106,10 @@ var PagedList = function (option) {
             return self.currentPage() !== self.totalPages() && self.loading() === false;
         });
 
+        self.showAllEntriesEnabled = ko.pureComputed(function () {
+            return self.totalEntries() > _defaultEntriesPerPage && self.loading() === false;
+        });
+
         self.showFirstEntriesEnabled = ko.pureComputed(function () {
             return self.hasEntries() && self.totalEntries() > _defaultEntriesPerPage && self.loading() === false;
         });
@@ -134,7 +138,7 @@ var PagedList = function (option) {
         });
 
         self.shownAll = ko.pureComputed(function () {
-            return self.entriesPerPage() >= self.totalEntries();
+            return self.totalEntries() <= _defaultEntriesPerPage ? false : self.entriesPerPage() >= self.totalEntries();
         });
 
         self.totalEntriesOnNextPage = function () {
