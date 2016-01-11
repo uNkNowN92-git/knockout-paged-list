@@ -170,8 +170,8 @@ var PagedList = function (option) {
         };
 
         self.lastPage = function () {
-            // Not yet implemented
-            // self.currentPage(self.totalPages());
+            _requestedPage(self.totalPages());
+            UpdateDisplayedEntries();
         };
 
         self.next = function () {
