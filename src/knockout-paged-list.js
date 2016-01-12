@@ -32,7 +32,8 @@ var PagedList = (function () {
 
         /* Paging variables */
 
-        var _url;
+        var _url = ko.observable();
+        var _queryOptions = ko.observable();
         var _requestedPage = ko.observable(1);
         var _requestedEntriesPerPage = ko.observable(1);
 
@@ -150,6 +151,14 @@ var PagedList = (function () {
 
         /* Server-related helpers */
 
+        self.url = ko.pureComputed(function () {
+            return _url();
+        });
+
+        self.queryOptions = ko.pureComputed(function () {
+            return _queryOptions();
+        });
+
         self.hasError = ko.pureComputed(function () {
             return self.error().length !== 0;
         });
@@ -240,7 +249,7 @@ var PagedList = (function () {
         /* Server-related functions */
 
         self.setUrl = function (url) {
-            _url = url !== undefined ? url : _defaultUrl;
+            _url(url !== undefined ? url : _defaultUrl);
         };
 
         self.getList = function (data, event) {
@@ -373,18 +382,18 @@ var PagedList = (function () {
         }
 
         function ExecuteQuery() {
-            if (_url !== undefined) {
+            if (_url() !== undefined) {
                 CancelPreviousRequest();
                 self.loading(true);
                 self.error([]);
 
-                var queryOptions = BuildQueryOptions();
-
+                _queryOptions(BuildQueryOptions());
+                
                 self.request = $.ajax({
-                    url: _url,
+                    url: _url().toString(),
                     method: 'get',
                     dataType: 'json',
-                    data: queryOptions,
+                    data: _queryOptions(),
                     success: ProcessResponse,
                     error: ProcessError,
                     beforeSend: SetHeader
@@ -499,8 +508,7 @@ var PagedList = (function () {
                 error: error
             });
 
-            // Clear applied filters
-            self.appliedFilter([]);
+            $.extend(self.appliedFilter(), { error: true });
 
             if (_clearLoadedDataOnError) {
                 // Clear previous laoded data
