@@ -45,7 +45,7 @@ var PagedList = (function () {
         /* Settings/Options variables */
 
         var _defaultUrl;
-        var _dataAsObservable = false;
+        var _dataAsObservable;
         var _queryOnLoad = true;
         var _defaultEntriesPerPage = 5;
         var _clearLoadedDataOnError = false;
@@ -551,7 +551,9 @@ var PagedList = (function () {
                 _clearLoadedDataOnError = ValueOrDefault(option.clearLoadedDataOnError, _clearLoadedDataOnError);
                 _queryOnFilterChangeOnly = ValueOrDefault(option.queryOnFilterChangeOnly, _queryOnFilterChangeOnly);
                 _mapping = ValueOrDefault(option.mapping, _mapping);
-                _dataAsObservable = ValueOrDefault(option.dataAsObservable, _dataAsObservable);
+                // setting dataAsObservable to false will make the mapping option to be useless
+                _dataAsObservable = ValueOrDefault(option.dataAsObservable,
+                    _dataAsObservable === undefined && _mapping !== undefined ? true : false);
 
                 if (_dataAsObservable === true && _mapping !== undefined) {
                     _dataPropertyCount = GetPropertiesCount(_mapping.create({ data: {} }));
