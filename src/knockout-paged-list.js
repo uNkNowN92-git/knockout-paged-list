@@ -16,7 +16,9 @@ var PagedList = (function () {
 
         /* Mapping variables */
 
-        var _mapping = {
+        var _mapping;
+
+        var _mappingNotAsObservable = {
             create: function (options) {
                 return options.data;
             }
@@ -37,6 +39,7 @@ var PagedList = (function () {
         /* Settings/Options variables */
 
         var _defaultUrl;
+        var _dataAsObservable = false;
         var _queryOnLoad = true;
         var _defaultEntriesPerPage = 5;
         var _clearLoadedDataOnError = false;
@@ -255,10 +258,23 @@ var PagedList = (function () {
         /* Mapping methods */
 
         function MapData() {
-            // make all data observable
-            var mappedData = ko.mapping.fromJS(_currentData, _mapping);
+            var mappedData;
 
-            // update data from mappedData observable
+            if (_dataAsObservable === false) {
+                // dont make all data observable
+                mappedData = ko.mapping.fromJS(_currentData, _mappingNotAsObservable);
+
+            } else if (_mapping === undefined) {
+                // make all data observable
+                mappedData = ko.mapping.fromJS(_currentData);
+
+            } else {
+                // make all data observable
+                mappedData = ko.mapping.fromJS(_currentData, _mapping);
+
+            }
+
+            // update data from mappedData
             self.data(mappedData);
         }
 
@@ -529,8 +545,13 @@ var PagedList = (function () {
                 _clearLoadedDataOnError = ValueOrDefault(option.clearLoadedDataOnError, _clearLoadedDataOnError);
                 _queryOnFilterChangeOnly = ValueOrDefault(option.queryOnFilterChangeOnly, _queryOnFilterChangeOnly);
                 _mapping = ValueOrDefault(option.mapping, _mapping);
+                _dataAsObservable = ValueOrDefault(option.dataAsObservable, _dataAsObservable);
 
-                _dataPropertyCount = GetPropertiesCount(_mapping.create({ data: {} }));
+                if (_dataAsObservable === true && _mapping !== undefined) {
+                    _dataPropertyCount = GetPropertiesCount(_mapping.create({ data: {} }));
+                } else {
+                    _dataPropertyCount = 0;
+                }
             }
         }
 
