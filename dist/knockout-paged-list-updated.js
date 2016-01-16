@@ -4,6 +4,12 @@
  * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
  * @license ISC
  */
+/*
+ * knockout-paged-list v1.1.4
+ * A KnockoutJS Plugin for Paged List/Grid
+ * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
+ * @license ISC
+ */
 var PagedList = (function () {
     return function (option) {
         var self = this;
