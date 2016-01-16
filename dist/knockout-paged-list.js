@@ -1,5 +1,5 @@
 /*
- * knockout-paged-list v1.1.4
+ * knockout-paged-list v1.1.5
  * A KnockoutJS Plugin for Paged List/Grid
  * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
  * @license ISC
