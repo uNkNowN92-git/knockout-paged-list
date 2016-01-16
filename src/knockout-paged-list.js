@@ -17,13 +17,6 @@ var PagedList = (function () {
         /* Mapping variables */
 
         var _mapping;
-
-        var _mappingNotAsObservable = {
-            create: function (options) {
-                return options.data;
-            }
-        };
-
         var _dataPropertyCount = 0;
 
         /* Data variables */
@@ -64,6 +57,7 @@ var PagedList = (function () {
         self.currentPage = ko.observable(1);
         self.entriesPerPage = ko.observable(_defaultEntriesPerPage);
         self.totalEntries = ko.observable(0);
+        self.isPageReloadRequired = ko.observable(false);
 
         /* Server-related observables */
 
@@ -134,11 +128,9 @@ var PagedList = (function () {
 
         self.loadedEntriesCount = ko.pureComputed(function () {
             var data = self.data();
+            var _data = typeof (data) === "function" ? data() : data;
 
-            if (typeof (data) === "function") {
-                return NotEmptyItemsCount(data());
-            }
-            return 0;
+            return NotEmptyItemsCount(_data);
         });
 
         self.shownAll = ko.pureComputed(function () {
@@ -271,7 +263,7 @@ var PagedList = (function () {
 
             if (_dataAsObservable === false) {
                 // dont make all data observable
-                mappedData = ko.mapping.fromJS(_currentData, _mappingNotAsObservable);
+                mappedData = _currentData;
 
             } else if (_mapping === undefined) {
                 // make all data observable
@@ -337,6 +329,10 @@ var PagedList = (function () {
                 // Request additional data
                 ExecuteQuery();
 
+            } else if (PageReloadIsRequired()) {
+                // Request updated data due to deletion or update
+                ExecuteQuery();
+
             } else {
                 // Update paging only
                 self.currentPage(_requestedPage());
@@ -360,11 +356,18 @@ var PagedList = (function () {
         }
 
         function UpdateNeeded() {
-            return (self.loadedEntriesCount() < self.totalEntriesOnNextPage() ||
-                self.entriesPerPage() !== _requestedEntriesPerPage()) &&
+            return self.loadedEntriesCount() < self.totalEntriesOnNextPage() &&
                 self.loadedEntriesCount() !== self.totalEntries();
         }
 
+        function PageReloadIsRequired() {
+            var result = self.isPageReloadRequired() === true;
+
+            // Reset after use
+            self.isPageReloadRequired(false);
+
+            return result;
+        }
 
         /* Server-related methods */
 
@@ -388,7 +391,7 @@ var PagedList = (function () {
                 self.error([]);
 
                 _queryOptions(BuildQueryOptions());
-                
+
                 self.request = $.ajax({
                     url: _url().toString(),
                     method: 'get',
@@ -442,37 +445,42 @@ var PagedList = (function () {
         }
 
         function ProcessResponse(response) {
-            if (response.data.length > 0) {
+            if (response.Data.length > 0) {
                 ProcessResponseData(response);
 
                 // Update current page to requested page
                 self.currentPage(_requestedPage());
             }
 
-            ProcessResponseDetails(response.details);
+            ProcessResponseDetails(response.Details);
             self.error([]);
         }
 
         function ProcessResponseData(response) {
-            var data = CreateEmptyObjectArray(response.details.totalEntries);
+            var data = CreateEmptyObjectArray(response.Details.TotalEntries);
 
             // retrieve existing data
             var existingData = self.data();
 
             if (typeof (existingData) === "function") {
                 // trim excess
-                existingData.splice(response.details.totalEntries, existingData().length - response.details.totalEntries);
+                existingData.splice(response.Details.TotalEntries, existingData().length - response.Details.TotalEntries);
 
                 // update items from existing data
                 data.updateItems(0, existingData());
+            } else {
+                existingData.splice(response.Details.TotalEntries, existingData.length - response.Details.TotalEntries);
+
+                // update items from existing data
+                data.updateItems(0, existingData);
             }
 
             // update items from response data
             if (self.sortOnly()) {
-                data.updateItems(0, response.data);
+                data.updateItems(0, response.Data);
                 self.sortOnly(false);
             } else {
-                data.updateItems(GetRequestedPageStartIndex(), response.data);
+                data.updateItems(GetRequestedPageStartIndex(), response.Data);
             }
 
             // extract columns
@@ -495,10 +503,10 @@ var PagedList = (function () {
         }
 
         function ProcessResponseDetails(details) {
-            if (details.totalEntries === 0) {
+            if (details.TotalEntries === 0) {
                 self.data([]);
             }
-            self.totalEntries(details.totalEntries);
+            self.totalEntries(details.TotalEntries);
         }
 
         function ProcessError(jqXHR, status, error) {
