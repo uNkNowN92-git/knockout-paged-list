@@ -47,6 +47,10 @@ var PagedList = (function () {
 
         /* Server-related variables */
 
+        var responseData;
+        var responseTotalEntries;
+        var responseDetails;
+
         self.request = undefined;
 
 
@@ -451,31 +455,35 @@ var PagedList = (function () {
         }
 
         function ProcessResponse(response) {
-            if (response.Data.length > 0) {
-                ProcessResponseData(response);
+            responseData = ValueOrDefault(response.data, response.Data);
+            responseDetails = ValueOrDefault(response.details, response.Details);
+            responseTotalEntries = ValueOrDefault(responseDetails.totalEntries, responseDetails.TotalEntries);
+
+            if (responseData.length > 0) {
+                ProcessResponseData();
 
                 // Update current page to requested page
                 self.currentPage(_requestedPage());
             }
 
-            ProcessResponseDetails(response.Details);
+            ProcessResponseDetails();
             self.error([]);
         }
 
-        function ProcessResponseData(response) {
-            var data = CreateEmptyObjectArray(response.Details.TotalEntries);
+        function ProcessResponseData() {
+            var data = CreateEmptyObjectArray(responseTotalEntries);
 
             // retrieve existing data
             var existingData = self.data();
 
             if (typeof (existingData) === "function") {
                 // trim excess
-                existingData.splice(response.Details.TotalEntries, existingData().length - response.Details.TotalEntries);
+                existingData.splice(responseTotalEntries, existingData().length - responseTotalEntries);
 
                 // update items from existing data
                 data.updateItems(0, existingData());
             } else {
-                existingData.splice(response.Details.TotalEntries, existingData.length - response.Details.TotalEntries);
+                existingData.splice(responseTotalEntries, existingData.length - responseTotalEntries);
 
                 // update items from existing data
                 data.updateItems(0, existingData);
@@ -483,10 +491,10 @@ var PagedList = (function () {
 
             // update items from response data
             if (self.sortOnly()) {
-                data.updateItems(0, response.Data);
+                data.updateItems(0, responseData);
                 self.sortOnly(false);
             } else {
-                data.updateItems(GetRequestedPageStartIndex(), response.Data);
+                data.updateItems(GetRequestedPageStartIndex(), responseData);
             }
 
             // extract columns
@@ -508,11 +516,12 @@ var PagedList = (function () {
             }
         }
 
-        function ProcessResponseDetails(details) {
-            if (details.TotalEntries === 0) {
+        function ProcessResponseDetails() {
+            if (responseTotalEntries === 0) {
                 self.data([]);
             }
-            self.totalEntries(details.TotalEntries);
+
+            self.totalEntries(responseTotalEntries);
         }
 
         function ProcessError(jqXHR, status, error) {
