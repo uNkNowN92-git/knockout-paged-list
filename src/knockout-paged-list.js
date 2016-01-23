@@ -1,4 +1,4 @@
-var PagedList = (function () {
+var PagedList = (function ($, ko) { 'use strict';
     return function (option) {
         var self = this;
 
@@ -29,10 +29,12 @@ var PagedList = (function () {
         var _queryOptions = ko.observable();
         var _requestedPage = ko.observable(1);
         var _requestedEntriesPerPage = ko.observable(1);
+        var _isPreserveCurrentPage = false;
+        var _pageNumber = ko.observable();
 
         /* Settings/Options variables */
 
-        var _defaultUrl;
+        var _defaultUrl = "/";
         var _dataAsObservable;
         var _queryOnLoad = true;
         var _defaultEntriesPerPage = 5;
@@ -40,11 +42,9 @@ var PagedList = (function () {
         var _queryOnFilterChangeOnly = true;
 
         /* Server-related variables */
-
         var responseData;
         var responseTotalEntries;
         var responseDetails;
-
         self.request = undefined;
 
 
@@ -85,6 +85,25 @@ var PagedList = (function () {
 
         /* Paging helpers */
 
+        self.pageNumber = ko.pureComputed({
+            write: function (value) {
+                _pageNumber(value);
+            },
+            read: function () {
+                return self.currentPage();
+            }
+        });
+
+        self.pageNumbers = ko.pureComputed(function () {
+            var _pageNumbers = [];
+
+            for (var i = 1; i <= self.totalPages() ; i++) {
+                _pageNumbers.push(i);
+            }
+
+            return _pageNumbers;
+        });
+
         // Entries to display
         self.entries = ko.pureComputed(function () {
             var first = GetCurrentPageStartIndex();
@@ -101,19 +120,20 @@ var PagedList = (function () {
         });
 
         self.previousEnabled = ko.pureComputed(function () {
-            return self.currentPage() !== 1 && self.loading() === false;
+            return self.currentPage() !== 1 && self.loading() === false && !self.hasError();
         });
 
         self.nextEnabled = ko.pureComputed(function () {
-            return self.currentPage() !== self.totalPages() && self.loading() === false;
+
+            return self.currentPage() !== self.totalPages() && self.loading() === false && !self.hasError();
         });
 
         self.showAllEntriesEnabled = ko.pureComputed(function () {
-            return self.totalEntries() > _defaultEntriesPerPage && self.loading() === false;
+            return self.totalEntries() > _defaultEntriesPerPage && self.loading() === false && !self.hasError();
         });
 
         self.showFirstEntriesEnabled = ko.pureComputed(function () {
-            return self.hasEntries() && self.totalEntries() > _defaultEntriesPerPage && self.loading() === false;
+            return self.hasEntries() && self.totalEntries() > _defaultEntriesPerPage && self.loading() === false && !self.hasError();
         });
 
         self.firstEntriesCount = ko.pureComputed(function () {
@@ -125,7 +145,7 @@ var PagedList = (function () {
         });
 
         self.nextItemsCount = ko.pureComputed(function () {
-            return self.totalPages() - self.currentPage() == 1 ?
+            return self.totalPages() - self.currentPage() === 1 ?
                 self.totalEntries() - (self.entriesPerPage() * (self.totalPages() - 1)) :
                 _defaultEntriesPerPage;
         });
@@ -171,6 +191,20 @@ var PagedList = (function () {
         /* FUNCTIONS */
 
         /* Paging functions */
+
+        self.preserveCurrentPage = function (isPreserve) {
+            _isPreserveCurrentPage = isPreserve !== undefined ? isPreserve : false;
+        };
+
+        self.goToPage = function () {
+            // TODO: take note of the loaded pages or check if page entries have been loaded already
+
+            //var pageNumber = _pageNumber();
+            //if (pageNumber < 1) return;
+
+            //_requestedPage(pageNumber);
+            //UpdateDisplayedEntries();
+        };
 
         self.firstPage = function () {
             _requestedPage(1);
@@ -249,7 +283,9 @@ var PagedList = (function () {
         };
 
         self.getList = function (data, event) {
-            _requestedPage(1);
+            if (_isPreserveCurrentPage === true) _requestedPage(self.currentPage());
+            else _requestedPage(1);
+
             GetDataUrl(event);
 
             UpdateDisplayedEntries();
@@ -465,7 +501,10 @@ var PagedList = (function () {
         }
 
         function ProcessResponseData() {
-            var data = CreateEmptyObjectArray(responseTotalEntries);
+            var objectLength = _requestedPage() * _requestedEntriesPerPage() <= responseTotalEntries ?
+                _requestedPage() * _requestedEntriesPerPage() : responseTotalEntries;
+
+            var data = CreateEmptyObjectArray(objectLength);
 
             // retrieve existing data
             var existingData = self.data();
@@ -596,4 +635,4 @@ var PagedList = (function () {
         Init();
 
     };
-})();
+})(jQuery, ko);
