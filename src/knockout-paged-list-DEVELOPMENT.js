@@ -1,4 +1,11 @@
-var PagedList = (function ($, ko) { 'use strict';
+/*
+ * knockout-paged-list v1.1.6
+ * A KnockoutJS Plugin for Paged List/Grid
+ * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
+ * @license ISC
+ */
+var PagedList = (function ($, ko) {
+    'use strict';
     return function (option) {
         var self = this;
 
@@ -97,7 +104,7 @@ var PagedList = (function ($, ko) { 'use strict';
         self.pageNumbers = ko.pureComputed(function () {
             var _pageNumbers = [];
 
-            for (var i = 1; i <= self.totalPages() ; i++) {
+            for (var i = 1; i <= self.totalPages(); i++) {
                 _pageNumbers.push(i);
             }
 
@@ -408,7 +415,7 @@ var PagedList = (function ($, ko) { 'use strict';
             });
             return result;
         }
-        
+
         function PageReloadIsRequired() {
             var result = self.isPageReloadRequired() === true;
 
@@ -509,35 +516,55 @@ var PagedList = (function ($, ko) { 'use strict';
             self.error([]);
         }
 
+        var data = [];
+
         function ProcessResponseData() {
+            // TODO: update objectLength computation based on loaded entries
             var objectLength = _requestedPage() * _requestedEntriesPerPage() <= responseTotalEntries ?
                 _requestedPage() * _requestedEntriesPerPage() : responseTotalEntries;
 
-            var data = CreateEmptyObjectArray(objectLength);
+            //if (data.length < objectLength)
+            //    data = CreateEmptyObjectArray(objectLength);
 
             // retrieve existing data
             var existingData = self.data();
 
-            if (typeof (existingData) === "function") {
-                // trim excess
-                existingData.splice(responseTotalEntries, existingData().length - responseTotalEntries);
+            if (data.length > objectLength) {
+                if (typeof (existingData) === "function") {
+                    // trim excess
+                    existingData.splice(responseTotalEntries, existingData().length - responseTotalEntries);
 
-                // update items from existing data
-                data.updateItems(0, existingData());
-            } else {
-                existingData.splice(responseTotalEntries, existingData.length - responseTotalEntries);
+                    // update items from existing data
+                    data.updateItems(0, existingData());
+                } else {
+                    existingData.splice(responseTotalEntries, existingData.length - responseTotalEntries);
 
-                // update items from existing data
-                data.updateItems(0, existingData);
-            }
+                    // update items from existing data
+                    data.updateItems(0, existingData);
+                }
 
-            // update items from response data
-            if (self.sortOnly()) {
-                data.updateItems(0, responseData);
-                self.sortOnly(false);
-            } else {
+                //// update items from response data
+                //if (self.sortOnly()) {
+                //    data.updateItems(0, responseData);
+                //    self.sortOnly(false);
+                //} else {
                 data.updateItems(GetRequestedPageStartIndex(), responseData);
+                //}
+            } else {
+                // update items from response data
+                if (self.sortOnly()) {
+                    data.updateItems(0, responseData);
+                    self.sortOnly(false);
+                } else {
+                    //data.updateItems(GetRequestedPageStartIndex(), responseData);
+                    var missingItemsLength = objectLength - (data.length + responseData.length);
+                    if (missingItemsLength > 0) {
+                        data = data.concat(CreateEmptyObjectArray(missingItemsLength));
+                    }
+                    data = data.concat(responseData);
+                }
             }
+
 
             // extract columns
             ExtractColumns(data[0]);
