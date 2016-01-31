@@ -1,4 +1,6 @@
-var PagedList = (function ($, ko) { 'use strict';
+var PagedList = (function ($, ko) {
+    'use strict';
+    
     return function (option) {
         var self = this;
 
@@ -398,7 +400,7 @@ var PagedList = (function ($, ko) { 'use strict';
                 self.loadedEntriesCount() !== self.totalEntries()) ||
                 !EntriesOnPageIsLoaded();
         }
-        
+
         function EntriesOnPageIsLoaded() {
             var result = true;
             var startIndex = (_requestedPage() - 1) * _requestedEntriesPerPage();
@@ -408,7 +410,7 @@ var PagedList = (function ($, ko) { 'use strict';
             });
             return result;
         }
-        
+
         function PageReloadIsRequired() {
             var result = self.isPageReloadRequired() === true;
 
