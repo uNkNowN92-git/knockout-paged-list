@@ -569,6 +569,8 @@ var PagedList = (function ($, ko) {
         }
 
         function ProcessError(jqXHR, status, error) {
+            if (jqXHR.status === 200) return;
+            
             self.error({
                 jqXHR: jqXHR,
                 status: status,

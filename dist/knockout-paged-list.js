@@ -1,5 +1,5 @@
 /*
- * knockout-paged-list v1.1.7
+ * knockout-paged-list v1.1.8
  * A KnockoutJS Plugin for Paged List/Grid
  * @repository https://github.com/uNkNowN92-git/knockout-paged-list.git
  * @license ISC
@@ -575,6 +575,8 @@ var PagedList = (function ($, ko) {
         }
 
         function ProcessError(jqXHR, status, error) {
+            if (jqXHR.status === 200) return;
+            
             self.error({
                 jqXHR: jqXHR,
                 status: status,
