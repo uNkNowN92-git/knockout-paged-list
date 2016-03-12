@@ -6,7 +6,7 @@
  */
 var PagedList = (function ($, ko) {
     'use strict';
-    
+
     return function (option) {
         var self = this;
 
@@ -105,7 +105,7 @@ var PagedList = (function ($, ko) {
         self.pageNumbers = ko.pureComputed(function () {
             var _pageNumbers = [];
 
-            for (var i = 1; i <= self.totalPages() ; i++) {
+            for (var i = 1; i <= self.totalPages(); i++) {
                 _pageNumbers.push(i);
             }
 
@@ -575,8 +575,12 @@ var PagedList = (function ($, ko) {
         }
 
         function ProcessError(jqXHR, status, error) {
-            if (jqXHR.status === 200) return;
-            
+            if (jqXHR.status === 200) {
+                responseTotalEntries = 0;
+                ProcessResponseDetails();
+                return;
+            }
+
             self.error({
                 jqXHR: jqXHR,
                 status: status,
